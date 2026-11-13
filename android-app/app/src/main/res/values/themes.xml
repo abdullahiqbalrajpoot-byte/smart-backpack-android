@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.SmartBackpackDisplay" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:statusBarColor">#06060C</item>
+        <item name="android:navigationBarColor">#06060C</item>
+        <item name="colorPrimary">@color/spotify_green</item>
+    </style>
+</resources>
