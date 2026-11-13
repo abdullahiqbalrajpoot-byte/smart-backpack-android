@@ -23,7 +23,7 @@ import com.smartbackpack.display.service.MediaNotificationListener
 
 class MainActivity : AppCompatActivity() {
 
-    private var binding: ActivityMainBinding? = null
+    private lateinit var binding: ActivityMainBinding
     private var bleService: BleService? = null
     private var isBound = false
 
@@ -40,9 +40,9 @@ class MainActivity : AppCompatActivity() {
 
                 bleService?.bleManager?.onLogMessage = { log ->
                     runOnUiThread {
-                        binding?.tvLogs?.append("\n$log")
-                        binding?.scrollLogs?.post { 
-                            binding?.scrollLogs?.fullScroll(android.view.View.FOCUS_DOWN) 
+                        binding.tvLogs.append("\n$log")
+                        binding.scrollLogs.post { 
+                            binding.scrollLogs.fullScroll(android.view.View.FOCUS_DOWN) 
                         }
                     }
                 }
@@ -72,32 +72,26 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        try {
-            binding = ActivityMainBinding.inflate(layoutInflater)
-            setContentView(binding?.root)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-            setupListeners()
-            checkNotificationAccess()
-            requestAppPermissions()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        setupListeners()
+        checkNotificationAccess()
+        requestAppPermissions()
     }
 
     private fun setupListeners() {
-        val b = binding ?: return
-
-        b.btnConnect.setOnClickListener {
+        binding.btnConnect.setOnClickListener {
             connectToServiceSafely()
             bleService?.bleManager?.startScanAndConnect()
         }
 
-        b.btnDisconnect.setOnClickListener {
+        binding.btnDisconnect.setOnClickListener {
             bleService?.bleManager?.disconnect()
         }
 
         // Test sending a track to preview on screen
-        b.btnSendTest.setOnClickListener {
+        binding.btnSendTest.setOnClickListener {
             val testBitmap = createPlaceholderBitmap("Starboy")
             val testTrack = MusicTrack(
                 title = "Starboy",
@@ -122,32 +116,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateConnectionUi(connected: Boolean) {
-        val b = binding ?: return
         if (connected) {
-            b.tvBleStatus.text = "CONNECTED"
-            b.tvBleStatus.setTextColor(Color.parseColor("#10B981"))
-            b.dotStatus.setBackgroundColor(Color.parseColor("#10B981"))
-            b.btnConnect.isEnabled = false
-            b.btnDisconnect.isEnabled = true
+            binding.tvBleStatus.text = "CONNECTED"
+            binding.tvBleStatus.setTextColor(Color.parseColor("#10B981"))
+            binding.dotStatus.setBackgroundColor(Color.parseColor("#10B981"))
+            binding.btnConnect.isEnabled = false
+            binding.btnDisconnect.isEnabled = true
         } else {
-            b.tvBleStatus.text = "DISCONNECTED"
-            b.tvBleStatus.setTextColor(Color.parseColor("#EF4444"))
-            b.dotStatus.setBackgroundColor(Color.parseColor("#EF4444"))
-            b.btnConnect.isEnabled = true
-            b.btnDisconnect.isEnabled = false
+            binding.tvBleStatus.text = "DISCONNECTED"
+            binding.tvBleStatus.setTextColor(Color.parseColor("#EF4444"))
+            binding.dotStatus.setBackgroundColor(Color.parseColor("#EF4444"))
+            binding.btnConnect.isEnabled = true
+            binding.btnDisconnect.isEnabled = false
         }
     }
 
     private fun updateTrackPreview(track: MusicTrack) {
-        val b = binding ?: return
-        b.tvTrackTitle.text = track.title
-        b.tvTrackArtist.text = track.artist
-        b.tvPlayState.text = if (track.playing) "Playing ▶" else "Paused ⏸"
+        binding.tvTrackTitle.text = track.title
+        binding.tvTrackArtist.text = track.artist
+        binding.tvPlayState.text = if (track.playing) "Playing ▶" else "Paused ⏸"
 
         track.artwork?.let {
-            b.ivArtwork.setImageBitmap(it)
+            binding.ivArtwork.setImageBitmap(it)
         } ?: run {
-            b.ivArtwork.setImageResource(android.R.drawable.ic_media_play)
+            binding.ivArtwork.setImageResource(android.R.drawable.ic_media_play)
         }
     }
 
@@ -234,7 +226,6 @@ class MainActivity : AppCompatActivity() {
             }
             isBound = false
         }
-        binding = null
         super.onDestroy()
     }
 }
