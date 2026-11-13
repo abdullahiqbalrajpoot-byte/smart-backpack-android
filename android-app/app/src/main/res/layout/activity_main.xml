@@ -1,221 +1,609 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#06060C"
-    android:padding="20dp"
+    android:background="#07070F"
+    android:fillViewport="true"
     tools:context=".MainActivity">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="16dp">
+        android:orientation="vertical"
+        android:padding="20dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🎒 SMART BACKPACK"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <View
-            android:id="@+id/dotStatus"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:background="#EF4444"
-            android:layout_marginEnd="8dp" />
-
-        <TextView
-            android:id="@+id/tvBleStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="DISCONNECTED"
-            android:textColor="#EF4444"
-            android:textSize="12sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-    <!-- Bluetooth Control Card -->
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardBackgroundColor="#0F0F1A"
-        app:cardCornerRadius="16dp"
-        app:strokeColor="#1FFFFFFF"
-        app:strokeWidth="1dp"
-        android:layout_marginBottom="16dp">
-
+        <!-- Top Header Bar -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="BLE Connection"
-                android:textColor="#9E9EB8"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textAllCaps="true"
-                android:layout_marginBottom="12dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="20dp">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-                <Button
-                    android:id="@+id/btnConnect"
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Scan &amp; Connect"
-                    android:backgroundTint="#1DB954"
+                    android:text="SMART BACKPACK"
                     android:textColor="#FFFFFF"
-                    android:layout_marginEnd="8dp" />
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05" />
 
-                <Button
-                    android:id="@+id/btnDisconnect"
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Disconnect"
-                    android:backgroundTint="#2E2E42"
-                    android:textColor="#FFFFFF"
-                    android:enabled="false" />
+                    android:text="ESP32 • ST7789 240×240 IPS"
+                    android:textColor="#7C7C9E"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="2dp" />
             </LinearLayout>
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
 
-    <!-- Live Media Stream Card -->
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardBackgroundColor="#0F0F1A"
-        app:cardCornerRadius="16dp"
-        app:strokeColor="#1FFFFFFF"
-        app:strokeWidth="1dp"
-        android:layout_marginBottom="16dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
+            <!-- Status Pill Badge -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Current Media Detected"
-                android:textColor="#9E9EB8"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textAllCaps="true"
-                android:layout_marginBottom="12dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <ImageView
-                    android:id="@+id/ivArtwork"
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:background="#1E1E38"
-                    android:scaleType="centerCrop"
-                    android:src="@android:drawable/ic_media_play"
-                    android:layout_marginEnd="16dp" />
+                app:cardBackgroundColor="#121224"
+                app:cardCornerRadius="20dp"
+                app:strokeColor="#252542"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp">
+
+                    <View
+                        android:id="@+id/dotStatus"
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:background="#EF4444"
+                        android:layout_marginEnd="6dp" />
 
                     <TextView
-                        android:id="@+id/tvTrackTitle"
+                        android:id="@+id/tvBleStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="No Song Playing"
-                        android:textColor="#FFFFFF"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:singleLine="true" />
-
-                    <TextView
-                        android:id="@+id/tvTrackArtist"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Open Spotify or YouTube Music"
-                        android:textColor="#9E9EB8"
-                        android:textSize="13sp"
-                        android:singleLine="true"
-                        android:layout_marginTop="2dp" />
-
-                    <TextView
-                        android:id="@+id/tvPlayState"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Idle"
-                        android:textColor="#1DB954"
+                        android:text="STANDBY"
+                        android:textColor="#EF4444"
                         android:textSize="11sp"
-                        android:layout_marginTop="4dp" />
+                        android:textStyle="bold" />
                 </LinearLayout>
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/btnSendTest"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Send Test Track (Starboy)"
-                android:backgroundTint="#3B82F6"
-                android:layout_marginTop="16dp" />
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
 
-    <!-- Debug Logs -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="BLE Debug Logs"
-        android:textColor="#9E9EB8"
-        android:textSize="11sp"
-        android:textStyle="bold"
-        android:textAllCaps="true"
-        android:layout_marginBottom="6dp" />
-
-    <ScrollView
-        android:id="@+id/scrollLogs"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#0A0A10"
-        android:padding="8dp">
-
-        <TextView
-            android:id="@+id/tvLogs"
+        <!-- Simulated Physical ESP32 Display Hero Card -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="System started. Ready to scan."
-            android:textColor="#4ADE80"
-            android:fontFamily="monospace"
-            android:textSize="10sp" />
-    </ScrollView>
+            app:cardBackgroundColor="#0D0D1A"
+            app:cardCornerRadius="24dp"
+            app:strokeColor="#2A2A48"
+            app:strokeWidth="1.5dp"
+            android:layout_marginBottom="20dp">
 
-</LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="LIVE BACKPACK SCREEN PREVIEW"
+                        android:textColor="#8B8BAA"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08" />
+
+                    <TextView
+                        android:id="@+id/tvDisplaySourceBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="SPOTIFY"
+                        android:textColor="#1DB954"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:background="#152B1E"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:paddingTop="3dp"
+                        android:paddingBottom="3dp" />
+                </LinearLayout>
+
+                <!-- Bezel Frame for ESP32 240x240 Display -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="220dp"
+                    android:layout_height="220dp"
+                    android:layout_gravity="center_horizontal"
+                    app:cardBackgroundColor="#000000"
+                    app:cardCornerRadius="16dp"
+                    app:strokeColor="#3F3F66"
+                    app:strokeWidth="3dp"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="10dp"
+                        android:gravity="center_horizontal">
+
+                        <!-- Screen Top Bar -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="8dp">
+
+                            <TextView
+                                android:id="@+id/tvScreenModeTag"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="NOW PLAYING"
+                                android:textColor="#10B981"
+                                android:textSize="9sp"
+                                android:textStyle="bold" />
+
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="0dp"
+                                android:layout_weight="1" />
+
+                            <TextView
+                                android:id="@+id/tvScreenDuration"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="00:00"
+                                android:textColor="#9CA3AF"
+                                android:textSize="9sp"
+                                android:fontFamily="monospace" />
+                        </LinearLayout>
+
+                        <!-- Display Content (Album Art + Info) -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <!-- 80x80 Display Artwork Frame -->
+                            <com.google.android.material.card.MaterialCardView
+                                android:layout_width="72dp"
+                                android:layout_height="72dp"
+                                app:cardCornerRadius="8dp"
+                                app:cardBackgroundColor="#1A1A2E"
+                                app:strokeColor="#4A4A7A"
+                                app:strokeWidth="1dp"
+                                android:layout_marginEnd="10dp">
+
+                                <ImageView
+                                    android:id="@+id/ivScreenArtwork"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:scaleType="centerCrop"
+                                    android:src="@android:drawable/ic_media_play" />
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/tvScreenTrackTitle"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Starboy"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="13sp"
+                                    android:textStyle="bold"
+                                    android:singleLine="true" />
+
+                                <TextView
+                                    android:id="@+id/tvScreenTrackArtist"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="The Weeknd"
+                                    android:textColor="#9E9EB8"
+                                    android:textSize="10sp"
+                                    android:singleLine="true"
+                                    android:layout_marginTop="2dp" />
+
+                                <TextView
+                                    android:id="@+id/tvScreenCustomBanner"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="🎒 MY BACKPACK"
+                                    android:textColor="#F59E0B"
+                                    android:textSize="9sp"
+                                    android:textStyle="bold"
+                                    android:singleLine="true"
+                                    android:layout_marginTop="6dp" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- Progress Bar on Simulated Display -->
+                        <ProgressBar
+                            android:id="@+id/pbScreenProgress"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="4dp"
+                            android:layout_marginTop="10dp"
+                            android:progress="35"
+                            android:progressTint="#10B981"
+                            android:progressBackgroundTint="#26263B" />
+
+                        <!-- Animated Mini Equalizer Spectrum Visualizer (8 Bars) -->
+                        <LinearLayout
+                            android:id="@+id/layoutEqualizer"
+                            android:layout_width="match_parent"
+                            android:layout_height="32dp"
+                            android:orientation="horizontal"
+                            android:gravity="bottom|center_horizontal"
+                            android:layout_marginTop="8dp">
+
+                            <View android:id="@+id/bar1" android:layout_width="12dp" android:layout_height="14dp" android:background="#10B981" android:layout_margin="2dp" />
+                            <View android:id="@+id/bar2" android:layout_width="12dp" android:layout_height="22dp" android:background="#06B6D4" android:layout_margin="2dp" />
+                            <View android:id="@+id/bar3" android:layout_width="12dp" android:layout_height="28dp" android:background="#3B82F6" android:layout_margin="2dp" />
+                            <View android:id="@+id/bar4" android:layout_width="12dp" android:layout_height="18dp" android:background="#8B5CF6" android:layout_margin="2dp" />
+                            <View android:id="@+id/bar5" android:layout_width="12dp" android:layout_height="26dp" android:background="#EC4899" android:layout_margin="2dp" />
+                            <View android:id="@+id/bar6" android:layout_width="12dp" android:layout_height="16dp" android:background="#F43F5E" android:layout_margin="2dp" />
+                            <View android:id="@+id/bar7" android:layout_width="12dp" android:layout_height="24dp" android:background="#F59E0B" android:layout_margin="2dp" />
+                            <View android:id="@+id/bar8" android:layout_width="12dp" android:layout_height="12dp" android:background="#10B981" android:layout_margin="2dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Quick Track Switcher Demo Buttons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <Button
+                        android:id="@+id/btnDemoSong1"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="38dp"
+                        android:layout_weight="1"
+                        android:text="Me, Myself"
+                        android:textColor="#E2E8F0"
+                        android:textSize="11sp"
+                        app:strokeColor="#3A3A5E"
+                        android:layout_marginEnd="6dp" />
+
+                    <Button
+                        android:id="@+id/btnDemoSong2"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="38dp"
+                        android:layout_weight="1"
+                        android:text="Starboy"
+                        android:textColor="#E2E8F0"
+                        android:textSize="11sp"
+                        app:strokeColor="#3A3A5E"
+                        android:layout_marginEnd="6dp" />
+
+                    <Button
+                        android:id="@+id/btnDemoSong3"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="38dp"
+                        android:layout_weight="1"
+                        android:text="Blinding"
+                        android:textColor="#E2E8F0"
+                        android:textSize="11sp"
+                        app:strokeColor="#3A3A5E" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Bluetooth Connection Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="#0D0D1A"
+            app:cardCornerRadius="20dp"
+            app:strokeColor="#232338"
+            app:strokeWidth="1dp"
+            android:layout_marginBottom="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="BLUETOOTH LOW ENERGY (BLE)"
+                    android:textColor="#7C7C9E"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.08"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnConnect"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:text="Scan &amp; Connect"
+                        android:backgroundTint="#10B981"
+                        android:textColor="#FFFFFF"
+                        android:textStyle="bold"
+                        app:cornerRadius="12dp"
+                        android:layout_marginEnd="8dp" />
+
+                    <Button
+                        android:id="@+id/btnDisconnect"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:text="Disconnect"
+                        android:backgroundTint="#1F1F33"
+                        android:textColor="#9E9EB8"
+                        app:cornerRadius="12dp"
+                        android:enabled="false" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Custom Backpack Text Banner Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="#0D0D1A"
+            app:cardCornerRadius="20dp"
+            app:strokeColor="#232338"
+            app:strokeWidth="1dp"
+            android:layout_marginBottom="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CUSTOM DISPLAY TEXT BANNER"
+                    android:textColor="#7C7C9E"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.08"
+                    android:layout_marginBottom="10dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <EditText
+                        android:id="@+id/etCustomBanner"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
+                        android:layout_weight="1"
+                        android:background="#151526"
+                        android:hint="Type custom marquee text..."
+                        android:textColorHint="#5E5E80"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:singleLine="true"
+                        android:layout_marginEnd="8dp" />
+
+                    <Button
+                        android:id="@+id/btnUpdateBanner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="46dp"
+                        android:text="Update"
+                        android:backgroundTint="#8B5CF6"
+                        android:textColor="#FFFFFF"
+                        android:textStyle="bold"
+                        app:cornerRadius="12dp" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Live Media Stream Detection Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="#0D0D1A"
+            app:cardCornerRadius="20dp"
+            app:strokeColor="#232338"
+            app:strokeWidth="1dp"
+            android:layout_marginBottom="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="NOW PLAYING DETECTOR"
+                    android:textColor="#7C7C9E"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.08"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardBackgroundColor="#1A1A2E"
+                        android:layout_marginEnd="14dp">
+
+                        <ImageView
+                            android:id="@+id/ivArtwork"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:src="@android:drawable/ic_media_play" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvTrackTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="No Song Playing"
+                            android:textColor="#FFFFFF"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:singleLine="true" />
+
+                        <TextView
+                            android:id="@+id/tvTrackArtist"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Open Spotify, YouTube Music or Apple Music"
+                            android:textColor="#7C7C9E"
+                            android:textSize="12sp"
+                            android:singleLine="true"
+                            android:layout_marginTop="2dp" />
+
+                        <TextView
+                            android:id="@+id/tvPlayState"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Idle"
+                            android:textColor="#10B981"
+                            android:textSize="11sp"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnSendTest"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:text="Re-Sync Display With Current Song"
+                    android:backgroundTint="#25253D"
+                    android:textColor="#E2E8F0"
+                    android:textSize="12sp"
+                    app:cornerRadius="10dp"
+                    android:layout_marginTop="14dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Hardware BLE Logs Terminal Drawer -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            app:cardBackgroundColor="#04040A"
+            app:cardCornerRadius="16dp"
+            app:strokeColor="#1F1F33"
+            app:strokeWidth="1dp"
+            android:layout_marginBottom="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="#0A0A17"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="DIAGNOSTIC CONSOLE"
+                        android:textColor="#6B7280"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08" />
+
+                    <TextView
+                        android:id="@+id/tvClearLogs"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="CLEAR"
+                        android:textColor="#9CA3AF"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:padding="4dp" />
+                </LinearLayout>
+
+                <ScrollView
+                    android:id="@+id/scrollLogs"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/tvLogs"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="[BLE] Service initialized.\n[BLE] Ready to scan for SMART_BACKPACK_DISPLAY."
+                        android:textColor="#10B981"
+                        android:fontFamily="monospace"
+                        android:textSize="10sp"
+                        android:lineSpacingExtra="2dp" />
+                </ScrollView>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
