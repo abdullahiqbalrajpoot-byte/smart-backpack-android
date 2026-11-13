@@ -1,229 +1,469 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0A0A14"
-    android:fillViewport="true"
+    android:background="#07070D"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <!-- Scrollable Main Content -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottomNav"
+        android:fillViewport="true">
 
-        <!-- Top Header Navigation -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="16dp">
+            android:orientation="vertical"
+            android:padding="16dp">
 
+            <!-- Mobile Top Bar (Exact Vercel SBD Header) -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="14dp">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <View
-                        android:id="@+id/themeAccentDot"
-                        android:layout_width="8dp"
-                        android:layout_height="8dp"
-                        android:background="#06B6D4"
-                        android:layout_marginEnd="8dp" />
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/tvLogo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="SMART BACKPACK"
-                        android:textColor="#F0F0F5"
-                        android:textSize="18sp"
+                        android:text="SBD"
+                        android:textColor="#10B981"
+                        android:textSize="22sp"
                         android:textStyle="bold"
-                        android:letterSpacing="0.06" />
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ESP32 DISPLAY COMPANION"
-                    android:textColor="#6B7280"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.08"
-                    android:layout_marginTop="2dp" />
-            </LinearLayout>
-
-            <!-- BLE Status Pill -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="#12121E"
-                app:cardCornerRadius="20dp"
-                app:strokeColor="#1FFFFFFF"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp">
-
-                    <View
-                        android:id="@+id/dotStatus"
-                        android:layout_width="8dp"
-                        android:layout_height="8dp"
-                        android:background="#EF4444"
-                        android:layout_marginEnd="6dp" />
+                        android:letterSpacing="0.05" />
 
                     <TextView
-                        android:id="@+id/tvBleStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="DISCONNECTED"
-                        android:textColor="#EF4444"
-                        android:textSize="11sp"
+                        android:text="Smart Backpack Display"
+                        android:textColor="#525266"
+                        android:textSize="10sp"
                         android:textStyle="bold" />
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
 
-        <!-- EXACT VERCEL PROTOTYPE BACKPACK ENCLOSURE -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="#181824"
-            app:cardCornerRadius="28dp"
-            app:strokeColor="#252538"
-            app:strokeWidth="1.5dp"
-            android:layout_marginBottom="20dp">
+                <!-- Section Badge & BLE Beacon -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="#12121E"
+                    app:cardCornerRadius="16dp"
+                    app:strokeColor="#1FFFFFFF"
+                    app:strokeWidth="1dp">
 
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp">
+
+                        <View
+                            android:id="@+id/dotStatus"
+                            android:layout_width="7dp"
+                            android:layout_height="7dp"
+                            android:background="#EF4444"
+                            android:layout_marginEnd="6dp" />
+
+                        <TextView
+                            android:id="@+id/tvTopSectionTag"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="DASHBOARD"
+                            android:textColor="#9E9EB8"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- DEVICE FRAME CONTAINER (EXACT VERCEL COMPONENT) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp"
-                android:gravity="center_horizontal">
+                android:gravity="center_horizontal"
+                android:layout_marginBottom="16dp">
 
-                <!-- Hardware Top LED Glow -->
-                <View
-                    android:id="@+id/hardwareLed"
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
-                    android:background="#EF4444"
-                    android:layout_marginBottom="12dp" />
+                <!-- Orientation Switcher Pill -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="#12121E"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="10dp">
 
-                <!-- 240x240 Display Screen Frame with Inner Bezel -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Display: "
+                        android:textColor="#6B7280"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/btnOrientLandscape"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↔ Landscape"
+                        android:textColor="#FFFFFF"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:background="#24243B"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="2dp"
+                        android:layout_marginEnd="4dp" />
+
+                    <TextView
+                        android:id="@+id/btnOrientPortrait"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↕ Portrait"
+                        android:textColor="#9E9EB8"
+                        android:textSize="10sp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="2dp" />
+                </LinearLayout>
+
+                <!-- Matte Hardware Enclosure -->
                 <com.google.android.material.card.MaterialCardView
-                    android:layout_width="260dp"
-                    android:layout_height="220dp"
-                    app:cardBackgroundColor="#050508"
-                    app:cardCornerRadius="18dp"
-                    app:strokeColor="#2E2E42"
-                    app:strokeWidth="2dp"
-                    android:layout_marginBottom="12dp">
+                    android:id="@+id/cardDeviceFrame"
+                    android:layout_width="300dp"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="#161622"
+                    app:cardCornerRadius="26dp"
+                    app:strokeColor="#2C2C40"
+                    app:strokeWidth="1.5dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="12dp"
                         android:gravity="center_horizontal">
 
-                        <!-- Screen Top Bar: Spotify Logo + Mini Equalizer -->
+                        <!-- Top Status LED Indicator -->
+                        <View
+                            android:id="@+id/hardwareLed"
+                            android:layout_width="7dp"
+                            android:layout_height="7dp"
+                            android:background="#EF4444"
+                            android:layout_marginBottom="8dp" />
+
+                        <!-- Inner 240x240 Screen Bezel with Glass Effect -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/innerScreenBezel"
+                            android:layout_width="match_parent"
+                            android:layout_height="190dp"
+                            app:cardBackgroundColor="#040408"
+                            app:cardCornerRadius="16dp"
+                            app:strokeColor="#303046"
+                            app:strokeWidth="2dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:padding="10dp">
+
+                                <!-- Screen Top Bar -->
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical"
+                                    android:layout_marginBottom="8dp">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="SPOTIFY"
+                                        android:textColor="#1DB954"
+                                        android:textSize="9sp"
+                                        android:textStyle="bold"
+                                        android:letterSpacing="0.08" />
+
+                                    <View
+                                        android:layout_width="0dp"
+                                        android:layout_height="0dp"
+                                        android:layout_weight="1" />
+
+                                    <!-- Mini Animated Equalizer in Screen -->
+                                    <LinearLayout
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="8dp"
+                                        android:orientation="horizontal"
+                                        android:gravity="bottom"
+                                        android:layout_marginEnd="6dp">
+
+                                        <View android:id="@+id/miniBar1" android:layout_width="2dp" android:layout_height="6dp" android:background="#10B981" android:layout_margin="1dp" />
+                                        <View android:id="@+id/miniBar2" android:layout_width="2dp" android:layout_height="8dp" android:background="#10B981" android:layout_margin="1dp" />
+                                        <View android:id="@+id/miniBar3" android:layout_width="2dp" android:layout_height="4dp" android:background="#10B981" android:layout_margin="1dp" />
+                                        <View android:id="@+id/miniBar4" android:layout_width="2dp" android:layout_height="7dp" android:background="#10B981" android:layout_margin="1dp" />
+                                    </LinearLayout>
+
+                                    <View
+                                        android:id="@+id/screenBleDot"
+                                        android:layout_width="5dp"
+                                        android:layout_height="5dp"
+                                        android:background="#EF4444" />
+                                </LinearLayout>
+
+                                <!-- Screen Center (Artwork + Info) -->
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="0dp"
+                                    android:layout_weight="1"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical">
+
+                                    <com.google.android.material.card.MaterialCardView
+                                        android:layout_width="72dp"
+                                        android:layout_height="72dp"
+                                        app:cardCornerRadius="10dp"
+                                        app:cardBackgroundColor="#0D0D18"
+                                        app:strokeColor="#242438"
+                                        app:strokeWidth="1dp"
+                                        android:layout_marginEnd="10dp">
+
+                                        <ImageView
+                                            android:id="@+id/ivScreenArtwork"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:scaleType="centerCrop"
+                                            android:src="@android:drawable/ic_media_play" />
+                                    </com.google.android.material.card.MaterialCardView>
+
+                                    <LinearLayout
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:orientation="vertical">
+
+                                        <TextView
+                                            android:id="@+id/tvScreenTrackTitle"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Me, Myself and I"
+                                            android:textColor="#FFFFFF"
+                                            android:textSize="13sp"
+                                            android:textStyle="bold"
+                                            android:singleLine="true" />
+
+                                        <TextView
+                                            android:id="@+id/tvScreenTrackArtist"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="G-Eazy, Bebe Rexha"
+                                            android:textColor="#9E9EB8"
+                                            android:textSize="10sp"
+                                            android:singleLine="true"
+                                            android:layout_marginTop="2dp" />
+
+                                        <TextView
+                                            android:id="@+id/tvScreenBannerTag"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="🎒 MY BACKPACK"
+                                            android:textColor="#10B981"
+                                            android:textSize="9sp"
+                                            android:textStyle="bold"
+                                            android:singleLine="true"
+                                            android:layout_marginTop="5dp" />
+                                    </LinearLayout>
+                                </LinearLayout>
+
+                                <!-- Screen Progress Scrubber -->
+                                <ProgressBar
+                                    android:id="@+id/pbScreenProgress"
+                                    style="?android:attr/progressBarStyleHorizontal"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="3dp"
+                                    android:progress="35"
+                                    android:progressTint="#10B981"
+                                    android:progressBackgroundTint="#1A1A2B" />
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:layout_marginTop="2dp">
+
+                                    <TextView
+                                        android:id="@+id/tvScreenCurrentTime"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="1:42"
+                                        android:textColor="#6B7280"
+                                        android:textSize="8sp"
+                                        android:fontFamily="monospace" />
+
+                                    <View
+                                        android:layout_width="0dp"
+                                        android:layout_height="0dp"
+                                        android:layout_weight="1" />
+
+                                    <TextView
+                                        android:id="@+id/tvScreenRemainingTime"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="-2:29"
+                                        android:textColor="#6B7280"
+                                        android:textSize="8sp"
+                                        android:fontFamily="monospace" />
+                                </LinearLayout>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- Chin Accent Bar -->
+                        <View
+                            android:layout_width="32dp"
+                            android:layout_height="2.5dp"
+                            android:background="#2E2E42"
+                            android:layout_marginTop="6dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- DIRECT DISPLAY MODE SWITCHER PILLS (EXACT VERCEL COMPONENT) -->
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none"
+                    android:layout_marginTop="12dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/btnModeNowPlaying"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🎵 Now Playing"
+                            android:textColor="#10B981"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:background="#152B1E"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:paddingTop="6dp"
+                            android:paddingBottom="6dp"
+                            android:layout_marginEnd="6dp" />
+
+                        <TextView
+                            android:id="@+id/btnModeVisualizer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="📊 Visualizer"
+                            android:textColor="#9E9EB8"
+                            android:textSize="11sp"
+                            android:background="#12121E"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:paddingTop="6dp"
+                            android:paddingBottom="6dp"
+                            android:layout_marginEnd="6dp" />
+
+                        <TextView
+                            android:id="@+id/btnModeMinimal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🔲 Minimal"
+                            android:textColor="#9E9EB8"
+                            android:textSize="11sp"
+                            android:background="#12121E"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:paddingTop="6dp"
+                            android:paddingBottom="6dp"
+                            android:layout_marginEnd="6dp" />
+
+                        <TextView
+                            android:id="@+id/btnModeCustomText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="💬 Backpack Text"
+                            android:textColor="#9E9EB8"
+                            android:textSize="11sp"
+                            android:background="#12121E"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:paddingTop="6dp"
+                            android:paddingBottom="6dp"
+                            android:layout_marginEnd="6dp" />
+
+                        <TextView
+                            android:id="@+id/btnModeStandby"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🌙 Standby"
+                            android:textColor="#9E9EB8"
+                            android:textSize="11sp"
+                            android:background="#12121E"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:paddingTop="6dp"
+                            android:paddingBottom="6dp" />
+                    </LinearLayout>
+                </HorizontalScrollView>
+            </LinearLayout>
+
+            <!-- ============================================== -->
+            <!-- SECTION 1: DASHBOARD / HOME CONTENT            -->
+            <!-- ============================================== -->
+            <LinearLayout
+                android:id="@+id/sectionDashboard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <!-- Player Controls Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="#12121E"
+                    app:cardCornerRadius="20dp"
+                    app:strokeColor="#1FFFFFFF"
+                    app:strokeWidth="1dp"
+                    android:layout_marginBottom="14dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:layout_marginBottom="10dp">
-
-                            <!-- Spotify Green Tag -->
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center_vertical">
-
-                                <View
-                                    android:layout_width="7dp"
-                                    android:layout_height="7dp"
-                                    android:background="#1DB954"
-                                    android:layout_marginEnd="5dp" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="SPOTIFY"
-                                    android:textColor="#1DB954"
-                                    android:textSize="9sp"
-                                    android:textStyle="bold"
-                                    android:letterSpacing="0.08" />
-                            </LinearLayout>
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="0dp"
-                                android:layout_weight="1" />
-
-                            <!-- Mini Equalizer in Screen Top Bar -->
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="10dp"
-                                android:orientation="horizontal"
-                                android:gravity="bottom"
-                                android:layout_marginEnd="6dp">
-
-                                <View android:id="@+id/miniBar1" android:layout_width="2dp" android:layout_height="6dp" android:background="#06B6D4" android:layout_margin="1dp" />
-                                <View android:id="@+id/miniBar2" android:layout_width="2dp" android:layout_height="10dp" android:background="#06B6D4" android:layout_margin="1dp" />
-                                <View android:id="@+id/miniBar3" android:layout_width="2dp" android:layout_height="5dp" android:background="#06B6D4" android:layout_margin="1dp" />
-                                <View android:id="@+id/miniBar4" android:layout_width="2dp" android:layout_height="8dp" android:background="#06B6D4" android:layout_margin="1dp" />
-                            </LinearLayout>
-
-                            <View
-                                android:id="@+id/screenBleIndicator"
-                                android:layout_width="6dp"
-                                android:layout_height="6dp"
-                                android:background="#6B7280" />
-                        </LinearLayout>
-
-                        <!-- Screen Content: Album Art + Song Info -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
                             android:gravity="center_vertical">
-
-                            <!-- Album Art Frame with Gloss Effect -->
-                            <com.google.android.material.card.MaterialCardView
-                                android:layout_width="80dp"
-                                android:layout_height="80dp"
-                                app:cardCornerRadius="12dp"
-                                app:cardBackgroundColor="#12121E"
-                                app:strokeColor="#2A2A3E"
-                                app:strokeWidth="1dp"
-                                android:layout_marginEnd="12dp">
-
-                                <ImageView
-                                    android:id="@+id/ivScreenArtwork"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:scaleType="centerCrop"
-                                    android:src="@android:drawable/ic_media_play" />
-                            </com.google.android.material.card.MaterialCardView>
 
                             <LinearLayout
                                 android:layout_width="0dp"
@@ -232,430 +472,650 @@
                                 android:orientation="vertical">
 
                                 <TextView
-                                    android:id="@+id/tvScreenTrackTitle"
+                                    android:id="@+id/tvPlayerTitle"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Me, Myself and I"
                                     android:textColor="#FFFFFF"
-                                    android:textSize="14sp"
+                                    android:textSize="16sp"
                                     android:textStyle="bold"
                                     android:singleLine="true" />
 
                                 <TextView
-                                    android:id="@+id/tvScreenTrackArtist"
+                                    android:id="@+id/tvPlayerArtist"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="G-Eazy, Bebe Rexha"
                                     android:textColor="#9E9EB8"
-                                    android:textSize="11sp"
+                                    android:textSize="12sp"
                                     android:singleLine="true"
                                     android:layout_marginTop="2dp" />
-
-                                <TextView
-                                    android:id="@+id/tvScreenCustomBanner"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="🎒 MY BACKPACK"
-                                    android:textColor="#06B6D4"
-                                    android:textSize="9sp"
-                                    android:textStyle="bold"
-                                    android:singleLine="true"
-                                    android:layout_marginTop="6dp" />
                             </LinearLayout>
+
+                            <!-- Play / Pause Button -->
+                            <Button
+                                android:id="@+id/btnPlayPause"
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:text="▶"
+                                android:textColor="#FFFFFF"
+                                android:textSize="16sp"
+                                android:backgroundTint="#10B981"
+                                app:cornerRadius="24dp" />
                         </LinearLayout>
 
-                        <!-- Progress Bar & Timers -->
+                        <!-- Transport Controls Row -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_marginTop="4dp">
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:layout_marginTop="12dp">
 
-                            <ProgressBar
-                                android:id="@+id/pbScreenProgress"
-                                style="?android:attr/progressBarStyleHorizontal"
-                                android:layout_width="match_parent"
-                                android:layout_height="4dp"
-                                android:progress="42"
-                                android:progressTint="#06B6D4"
-                                android:progressBackgroundTint="#202030" />
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
+                            <Button
+                                android:id="@+id/btnPrevTrack"
+                                style="@style/Widget.MaterialComponents.Button.TextButton"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:layout_marginTop="3dp">
+                                android:text="⏮ Prev"
+                                android:textColor="#9E9EB8" />
 
-                                <TextView
-                                    android:id="@+id/tvScreenCurrentTime"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="1:45"
-                                    android:textColor="#6B7280"
-                                    android:textSize="9sp"
-                                    android:fontFamily="monospace" />
-
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="0dp"
-                                    android:layout_weight="1" />
-
-                                <TextView
-                                    android:id="@+id/tvScreenRemainingTime"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="-2:26"
-                                    android:textColor="#6B7280"
-                                    android:textSize="9sp"
-                                    android:fontFamily="monospace" />
-                            </LinearLayout>
+                            <Button
+                                android:id="@+id/btnNextTrack"
+                                style="@style/Widget.MaterialComponents.Button.TextButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Next ⏭"
+                                android:textColor="#9E9EB8"
+                                android:layout_marginStart="16dp" />
                         </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Bottom Hardware Chin Accent (from Vercel frame) -->
-                <View
-                    android:layout_width="40dp"
-                    android:layout_height="3dp"
-                    android:background="#2E2E44"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- REAL-TIME BLUETOOTH CONTROL HUB -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="#12121E"
-            app:cardCornerRadius="20dp"
-            app:strokeColor="#1FFFFFFF"
-            app:strokeWidth="1dp"
-            android:layout_marginBottom="16dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="BLUETOOTH HARDWARE LINK"
-                    android:textColor="#6B7280"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.08"
-                    android:layout_marginBottom="12dp" />
-
-                <LinearLayout
+                <!-- Track Library / Playlist Preview -->
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    app:cardBackgroundColor="#12121E"
+                    app:cardCornerRadius="20dp"
+                    app:strokeColor="#1FFFFFFF"
+                    app:strokeWidth="1dp"
+                    android:layout_marginBottom="14dp">
 
-                    <Button
-                        android:id="@+id/btnConnect"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_weight="1"
-                        android:text="Scan &amp; Connect"
-                        android:backgroundTint="#06B6D4"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold"
-                        app:cornerRadius="12dp"
-                        android:layout_marginEnd="8dp" />
-
-                    <Button
-                        android:id="@+id/btnDisconnect"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_weight="1"
-                        android:text="Disconnect"
-                        android:backgroundTint="#1F1F30"
-                        android:textColor="#9E9EB8"
-                        app:cornerRadius="12dp"
-                        android:enabled="false" />
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- THEME SELECTOR (EXACT SAME AS VERCEL THEME PANEL) -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="#12121E"
-            app:cardCornerRadius="20dp"
-            app:strokeColor="#1FFFFFFF"
-            app:strokeWidth="1dp"
-            android:layout_marginBottom="16dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="CHOOSE COLOR ACCENT"
-                    android:textColor="#6B7280"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.08"
-                    android:layout_marginBottom="12dp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center">
-
-                    <Button
-                        android:id="@+id/btnThemeCyber"
-                        android:layout_width="0dp"
-                        android:layout_height="38dp"
-                        android:layout_weight="1"
-                        android:text="Cyan"
-                        android:textColor="#FFFFFF"
-                        android:textSize="11sp"
-                        android:backgroundTint="#06B6D4"
-                        app:cornerRadius="8dp"
-                        android:layout_marginEnd="6dp" />
-
-                    <Button
-                        android:id="@+id/btnThemePurple"
-                        android:layout_width="0dp"
-                        android:layout_height="38dp"
-                        android:layout_weight="1"
-                        android:text="Purple"
-                        android:textColor="#FFFFFF"
-                        android:textSize="11sp"
-                        android:backgroundTint="#8B5CF6"
-                        app:cornerRadius="8dp"
-                        android:layout_marginEnd="6dp" />
-
-                    <Button
-                        android:id="@+id/btnThemeGreen"
-                        android:layout_width="0dp"
-                        android:layout_height="38dp"
-                        android:layout_weight="1"
-                        android:text="Matrix"
-                        android:textColor="#FFFFFF"
-                        android:textSize="11sp"
-                        android:backgroundTint="#22C55E"
-                        app:cornerRadius="8dp"
-                        android:layout_marginEnd="6dp" />
-
-                    <Button
-                        android:id="@+id/btnThemeOrange"
-                        android:layout_width="0dp"
-                        android:layout_height="38dp"
-                        android:layout_weight="1"
-                        android:text="Sunset"
-                        android:textColor="#FFFFFF"
-                        android:textSize="11sp"
-                        android:backgroundTint="#F97316"
-                        app:cornerRadius="8dp" />
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- DEMO TRACK QUICK SWITCHER -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="#12121E"
-            app:cardCornerRadius="20dp"
-            app:strokeColor="#1FFFFFFF"
-            app:strokeWidth="1dp"
-            android:layout_marginBottom="16dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="TRACK QUICK-LOADER"
-                    android:textColor="#6B7280"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.08"
-                    android:layout_marginBottom="12dp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/btnDemoSong1"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="40dp"
-                        android:layout_weight="1"
-                        android:text="Me, Myself"
-                        android:textColor="#E2E8F0"
-                        android:textSize="11sp"
-                        app:strokeColor="#3A3A52"
-                        app:cornerRadius="8dp"
-                        android:layout_marginEnd="6dp" />
-
-                    <Button
-                        android:id="@+id/btnDemoSong2"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="40dp"
-                        android:layout_weight="1"
-                        android:text="Starboy"
-                        android:textColor="#E2E8F0"
-                        android:textSize="11sp"
-                        app:strokeColor="#3A3A52"
-                        app:cornerRadius="8dp"
-                        android:layout_marginEnd="6dp" />
-
-                    <Button
-                        android:id="@+id/btnDemoSong3"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="40dp"
-                        android:layout_weight="1"
-                        android:text="Blinding"
-                        android:textColor="#E2E8F0"
-                        android:textSize="11sp"
-                        app:strokeColor="#3A3A52"
-                        app:cornerRadius="8dp" />
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- CUSTOM BACKPACK TEXT BANNER -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="#12121E"
-            app:cardCornerRadius="20dp"
-            app:strokeColor="#1FFFFFFF"
-            app:strokeWidth="1dp"
-            android:layout_marginBottom="16dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="BACKPACK MARQUEE TEXT"
-                    android:textColor="#6B7280"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.08"
-                    android:layout_marginBottom="10dp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <EditText
-                        android:id="@+id/etCustomBanner"
-                        android:layout_width="0dp"
-                        android:layout_height="46dp"
-                        android:layout_weight="1"
-                        android:background="#1A1A2B"
-                        android:hint="Type custom marquee text..."
-                        android:textColorHint="#4B5563"
-                        android:textColor="#FFFFFF"
-                        android:textSize="13sp"
-                        android:paddingStart="14dp"
-                        android:paddingEnd="14dp"
-                        android:singleLine="true"
-                        android:layout_marginEnd="8dp" />
-
-                    <Button
-                        android:id="@+id/btnUpdateBanner"
-                        android:layout_width="wrap_content"
-                        android:layout_height="46dp"
-                        android:text="Send"
-                        android:backgroundTint="#06B6D4"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold"
-                        app:cornerRadius="10dp" />
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- DIAGNOSTIC CONSOLE -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="140dp"
-            app:cardBackgroundColor="#05050A"
-            app:cardCornerRadius="16dp"
-            app:strokeColor="#1E1E2E"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:background="#0D0D18"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="DIAGNOSTIC CONSOLE"
-                        android:textColor="#6B7280"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08" />
-
-                    <TextView
-                        android:id="@+id/tvClearLogs"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="CLEAR"
-                        android:textColor="#9CA3AF"
-                        android:textSize="10sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <ScrollView
-                    android:id="@+id/scrollLogs"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:padding="8dp">
-
-                    <TextView
-                        android:id="@+id/tvLogs"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="[BLE] System ready. Native scan engine active."
-                        android:textColor="#10B981"
-                        android:fontFamily="monospace"
-                        android:textSize="10sp" />
-                </ScrollView>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="MUSIC LIBRARY"
+                            android:textColor="#6B7280"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.08"
+                            android:layout_marginBottom="10dp" />
+
+                        <!-- Song 1 Item -->
+                        <LinearLayout
+                            android:id="@+id/trackItem1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp">
+
+                            <TextView
+                                android:layout_width="20dp"
+                                android:layout_height="wrap_content"
+                                android:text="01"
+                                android:textColor="#10B981"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Me, Myself and I"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="13sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="G-Eazy, Bebe Rexha"
+                                    android:textColor="#6B7280"
+                                    android:textSize="10sp" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="▶ Play"
+                                android:textColor="#10B981"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Song 2 Item -->
+                        <LinearLayout
+                            android:id="@+id/trackItem2"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp">
+
+                            <TextView
+                                android:layout_width="20dp"
+                                android:layout_height="wrap_content"
+                                android:text="02"
+                                android:textColor="#6B7280"
+                                android:textSize="11sp" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Starboy"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="13sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="The Weeknd, Daft Punk"
+                                    android:textColor="#6B7280"
+                                    android:textSize="10sp" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Play"
+                                android:textColor="#9E9EB8"
+                                android:textSize="11sp" />
+                        </LinearLayout>
+
+                        <!-- Song 3 Item -->
+                        <LinearLayout
+                            android:id="@+id/trackItem3"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp">
+
+                            <TextView
+                                android:layout_width="20dp"
+                                android:layout_height="wrap_content"
+                                android:text="03"
+                                android:textColor="#6B7280"
+                                android:textSize="11sp" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Blinding Lights"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="13sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="The Weeknd"
+                                    android:textColor="#6B7280"
+                                    android:textSize="10sp" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Play"
+                                android:textColor="#9E9EB8"
+                                android:textSize="11sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- ============================================== -->
+            <!-- SECTION 2: BLUETOOTH (BT) CONTENT              -->
+            <!-- ============================================== -->
+            <LinearLayout
+                android:id="@+id/sectionBluetooth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="#12121E"
+                    app:cardCornerRadius="20dp"
+                    app:strokeColor="#1FFFFFFF"
+                    app:strokeWidth="1dp"
+                    android:layout_marginBottom="14dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="BLUETOOTH HARDWARE CONTROL"
+                            android:textColor="#6B7280"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.08"
+                            android:layout_marginBottom="12dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <Button
+                                android:id="@+id/btnConnect"
+                                android:layout_width="0dp"
+                                android:layout_height="48dp"
+                                android:layout_weight="1"
+                                android:text="Scan &amp; Connect"
+                                android:backgroundTint="#10B981"
+                                android:textColor="#FFFFFF"
+                                android:textStyle="bold"
+                                app:cornerRadius="12dp"
+                                android:layout_marginEnd="8dp" />
+
+                            <Button
+                                android:id="@+id/btnDisconnect"
+                                android:layout_width="0dp"
+                                android:layout_height="48dp"
+                                android:layout_weight="1"
+                                android:text="Disconnect"
+                                android:backgroundTint="#1F1F30"
+                                android:textColor="#9E9EB8"
+                                app:cornerRadius="12dp"
+                                android:enabled="false" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Live Diagnostic Log Console -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="220dp"
+                    app:cardBackgroundColor="#05050A"
+                    app:cardCornerRadius="16dp"
+                    app:strokeColor="#1E1E2E"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:background="#0D0D18"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:paddingTop="6dp"
+                            android:paddingBottom="6dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="DIAGNOSTIC TERMINAL"
+                                android:textColor="#6B7280"
+                                android:textSize="10sp"
+                                android:textStyle="bold"
+                                android:letterSpacing="0.08" />
+
+                            <TextView
+                                android:id="@+id/tvClearLogs"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="CLEAR"
+                                android:textColor="#9CA3AF"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <ScrollView
+                            android:id="@+id/scrollLogs"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:id="@+id/tvLogs"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="[BLE Engine] Ready to scan for SMART_BACKPACK_DISPLAY."
+                                android:textColor="#10B981"
+                                android:fontFamily="monospace"
+                                android:textSize="10sp" />
+                        </ScrollView>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- ============================================== -->
+            <!-- SECTION 3: DISPLAY SETTINGS & BACKPACK TEXT    -->
+            <!-- ============================================== -->
+            <LinearLayout
+                android:id="@+id/sectionDisplay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="#12121E"
+                    app:cardCornerRadius="20dp"
+                    app:strokeColor="#1FFFFFFF"
+                    app:strokeWidth="1dp"
+                    android:layout_marginBottom="14dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="BACKPACK TEXT BANNER"
+                            android:textColor="#6B7280"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.08"
+                            android:layout_marginBottom="10dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <EditText
+                                android:id="@+id/etCustomBanner"
+                                android:layout_width="0dp"
+                                android:layout_height="46dp"
+                                android:layout_weight="1"
+                                android:background="#1A1A2B"
+                                android:hint="Type custom marquee text..."
+                                android:textColorHint="#4B5563"
+                                android:textColor="#FFFFFF"
+                                android:textSize="13sp"
+                                android:paddingStart="14dp"
+                                android:paddingEnd="14dp"
+                                android:singleLine="true"
+                                android:layout_marginEnd="8dp" />
+
+                            <Button
+                                android:id="@+id/btnUpdateBanner"
+                                android:layout_width="wrap_content"
+                                android:layout_height="46dp"
+                                android:text="Send"
+                                android:backgroundTint="#10B981"
+                                android:textColor="#FFFFFF"
+                                android:textStyle="bold"
+                                app:cornerRadius="10dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- ============================================== -->
+            <!-- SECTION 4: THEMES & GENERAL SETTINGS           -->
+            <!-- ============================================== -->
+            <LinearLayout
+                android:id="@+id/sectionSettings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="#12121E"
+                    app:cardCornerRadius="20dp"
+                    app:strokeColor="#1FFFFFFF"
+                    app:strokeWidth="1dp"
+                    android:layout_marginBottom="14dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ACCENT COLOR THEMES"
+                            android:textColor="#6B7280"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.08"
+                            android:layout_marginBottom="12dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center">
+
+                            <Button
+                                android:id="@+id/btnThemeEmerald"
+                                android:layout_width="0dp"
+                                android:layout_height="38dp"
+                                android:layout_weight="1"
+                                android:text="Emerald"
+                                android:textColor="#FFFFFF"
+                                android:textSize="10sp"
+                                android:backgroundTint="#10B981"
+                                app:cornerRadius="8dp"
+                                android:layout_marginEnd="6dp" />
+
+                            <Button
+                                android:id="@+id/btnThemeCyan"
+                                android:layout_width="0dp"
+                                android:layout_height="38dp"
+                                android:layout_weight="1"
+                                android:text="Cyan"
+                                android:textColor="#FFFFFF"
+                                android:textSize="10sp"
+                                android:backgroundTint="#06B6D4"
+                                app:cornerRadius="8dp"
+                                android:layout_marginEnd="6dp" />
+
+                            <Button
+                                android:id="@+id/btnThemePurple"
+                                android:layout_width="0dp"
+                                android:layout_height="38dp"
+                                android:layout_weight="1"
+                                android:text="Purple"
+                                android:textColor="#FFFFFF"
+                                android:textSize="10sp"
+                                android:backgroundTint="#8B5CF6"
+                                app:cornerRadius="8dp"
+                                android:layout_marginEnd="6dp" />
+
+                            <Button
+                                android:id="@+id/btnThemeOrange"
+                                android:layout_width="0dp"
+                                android:layout_height="38dp"
+                                android:layout_weight="1"
+                                android:text="Sunset"
+                                android:textColor="#FFFFFF"
+                                android:textSize="10sp"
+                                android:backgroundTint="#F97316"
+                                app:cornerRadius="8dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- EXACT VERCEL BOTTOM NAVIGATION BAR (MobileNav) -->
+    <LinearLayout
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="58dp"
+        android:layout_alignParentBottom="true"
+        android:background="#0F0F18"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <!-- Tab 1: Home -->
+        <LinearLayout
+            android:id="@+id/tabHome"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🏠"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tvTabHome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Home"
+                android:textColor="#10B981"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Tab 2: Display -->
+        <LinearLayout
+            android:id="@+id/tabDisplay"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🖥️"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tvTabDisplay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Display"
+                android:textColor="#6B7280"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <!-- Tab 3: Bluetooth -->
+        <LinearLayout
+            android:id="@+id/tabBt"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📶"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tvTabBt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BT"
+                android:textColor="#6B7280"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <!-- Tab 4: Settings -->
+        <LinearLayout
+            android:id="@+id/tabSettings"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚙️"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tvTabSettings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Settings"
+                android:textColor="#6B7280"
+                android:textSize="10sp" />
+        </LinearLayout>
     </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+
+</RelativeLayout>
