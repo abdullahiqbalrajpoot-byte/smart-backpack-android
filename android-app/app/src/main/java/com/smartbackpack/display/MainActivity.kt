@@ -30,9 +30,18 @@ class MainActivity : AppCompatActivity() {
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private var isAnimating = false
-    private var currentAccentColor = Color.parseColor("#06B6D4") // Default Cyber Cyan
+    private var isPlaying = true
+    private var currentAccentColor = Color.parseColor("#10B981") // Default Vercel Emerald
     private var currentCustomBanner = "🎒 MY BACKPACK"
     private var currentTrack: MusicTrack? = null
+    private var currentTrackIndex = 0
+
+    // Curated catalogue matching Vercel website
+    private val playlist = listOf(
+        Triple("Me, Myself and I", "G-Eazy, Bebe Rexha", Color.parseColor("#10B981")),
+        Triple("Starboy", "The Weeknd, Daft Punk", Color.parseColor("#E50914")),
+        Triple("Blinding Lights", "The Weeknd", Color.parseColor("#8B5CF6"))
+    )
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -73,18 +82,18 @@ class MainActivity : AppCompatActivity() {
         if (granted) {
             connectToServiceSafely()
         } else {
-            Toast.makeText(this, "Bluetooth permissions required to connect to display", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Bluetooth permissions required", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // Mini Equalizer animation runnable
+    // Mini animated equalizer bars inside screen
     private val equalizerRunnable = object : Runnable {
         override fun run() {
             if (!isAnimating) return
             try {
                 val bars = listOf(binding.miniBar1, binding.miniBar2, binding.miniBar3, binding.miniBar4)
                 for (b in bars) {
-                    val h = Random.nextInt(4, 11)
+                    val h = Random.nextInt(3, 9)
                     val px = (h * resources.displayMetrics.density).toInt()
                     b.layoutParams.height = px
                     b.requestLayout()
@@ -92,7 +101,7 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 // Ignore transient layout
             }
-            mainHandler.postDelayed(this, 150)
+            mainHandler.postDelayed(this, 140)
         }
     }
 
@@ -101,39 +110,134 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupListeners()
+        setupBottomNavigation()
+        setupOrientationToggle()
+        setupDisplayModePills()
+        setupPlayerControls()
         setupThemeButtons()
-        setupDemoTracks()
+        setupBluetoothButtons()
         startEqualizer()
         checkNotificationAccess()
         requestAppPermissions()
 
-        // Load initial track (Me, Myself and I) matching Vercel prototype
-        loadDemoTrack("Me, Myself and I", "G-Eazy, Bebe Rexha", "When It's Dark Out", Color.parseColor("#06B6D4"), Color.parseColor("#0B192C"))
+        // Load default song
+        loadSongByIndex(0)
     }
 
-    private fun setupListeners() {
-        binding.btnConnect.setOnClickListener {
-            connectToServiceSafely()
-            bleService?.bleManager?.startScanAndConnect()
-            updateConnectionUi(false, isScanning = true)
+    // -------------------------------------------------------------
+    // 1. EXACT VERCEL BOTTOM NAVIGATION TABS
+    // -------------------------------------------------------------
+    private fun setupBottomNavigation() {
+        binding.tabHome.setOnClickListener { switchTab("dashboard", binding.tvTabHome, binding.sectionDashboard) }
+        binding.tabDisplay.setOnClickListener { switchTab("display", binding.tvTabDisplay, binding.sectionDisplay) }
+        binding.tabBt.setOnClickListener { switchTab("bluetooth", binding.tvTabBt, binding.sectionBluetooth) }
+        binding.tabSettings.setOnClickListener { switchTab("settings", binding.tvTabSettings, binding.sectionSettings) }
+    }
+
+    private fun switchTab(sectionName: String, activeLabel: android.widget.TextView, activeSectionView: View) {
+        val labels = listOf(binding.tvTabHome, binding.tvTabDisplay, binding.tvTabBt, binding.tvTabSettings)
+        val sections = listOf(binding.sectionDashboard, binding.sectionDisplay, binding.sectionBluetooth, binding.sectionSettings)
+
+        // Reset all tabs
+        for (lbl in labels) lbl.setTextColor(Color.parseColor("#6B7280"))
+        for (sec in sections) sec.visibility = View.GONE
+
+        // Activate selected tab
+        activeLabel.setTextColor(currentAccentColor)
+        activeSectionView.visibility = View.VISIBLE
+        binding.tvTopSectionTag.text = sectionName.uppercase()
+    }
+
+    // -------------------------------------------------------------
+    // 2. DISPLAY ORIENTATION SWITCHER
+    // -------------------------------------------------------------
+    private fun setupOrientationToggle() {
+        binding.btnOrientLandscape.setOnClickListener {
+            binding.btnOrientLandscape.setBackgroundColor(Color.parseColor("#24243B"))
+            binding.btnOrientLandscape.setTextColor(Color.WHITE)
+            binding.btnOrientPortrait.setBackgroundColor(Color.TRANSPARENT)
+            binding.btnOrientPortrait.setTextColor(Color.parseColor("#9E9EB8"))
+
+            // Adjust bezel dimensions to Landscape
+            binding.innerScreenBezel.layoutParams.height = (190 * resources.displayMetrics.density).toInt()
+            binding.innerScreenBezel.requestLayout()
         }
 
-        binding.btnDisconnect.setOnClickListener {
-            bleService?.bleManager?.disconnect()
-            updateConnectionUi(false)
+        binding.btnOrientPortrait.setOnClickListener {
+            binding.btnOrientPortrait.setBackgroundColor(Color.parseColor("#24243B"))
+            binding.btnOrientPortrait.setTextColor(Color.WHITE)
+            binding.btnOrientLandscape.setBackgroundColor(Color.TRANSPARENT)
+            binding.btnOrientLandscape.setTextColor(Color.parseColor("#9E9EB8"))
+
+            // Adjust bezel dimensions to Portrait
+            binding.innerScreenBezel.layoutParams.height = (250 * resources.displayMetrics.density).toInt()
+            binding.innerScreenBezel.requestLayout()
+        }
+    }
+
+    // -------------------------------------------------------------
+    // 3. DISPLAY MODE PILLS (Directly under screen)
+    // -------------------------------------------------------------
+    private fun setupDisplayModePills() {
+        val pills = listOf(
+            Pair(binding.btnModeNowPlaying, "NOW PLAYING"),
+            Pair(binding.btnModeVisualizer, "VISUALIZER"),
+            Pair(binding.btnModeMinimal, "MINIMAL"),
+            Pair(binding.btnModeCustomText, "CUSTOM TEXT"),
+            Pair(binding.btnModeStandby, "STANDBY")
+        )
+
+        for ((btn, modeName) in pills) {
+            btn.setOnClickListener {
+                for ((b, _) in pills) {
+                    b.setBackgroundColor(Color.parseColor("#12121E"))
+                    b.setTextColor(Color.parseColor("#9E9EB8"))
+                }
+                btn.setBackgroundColor(Color.parseColor("#152B1E"))
+                btn.setTextColor(currentAccentColor)
+
+                binding.tvScreenBannerTag.text = "MODE: $modeName"
+                Toast.makeText(this, "Display Mode: $modeName", Toast.LENGTH_SHORT).show()
+
+                currentTrack?.let { bleService?.bleManager?.sendMetadata(it) }
+            }
+        }
+    }
+
+    // -------------------------------------------------------------
+    // 4. MUSIC PLAYER & PLAYLIST CONTROLS
+    // -------------------------------------------------------------
+    private fun setupPlayerControls() {
+        binding.btnPlayPause.setOnClickListener {
+            isPlaying = !isPlaying
+            binding.btnPlayPause.text = if (isPlaying) "⏸" else "▶"
+            currentTrack = currentTrack?.copy(playing = isPlaying)
+
+            if (isPlaying) startEqualizer() else stopEqualizer()
+            currentTrack?.let { bleService?.bleManager?.sendMetadata(it) }
         }
 
-        binding.tvClearLogs.setOnClickListener {
-            binding.tvLogs.text = "[BLE] Console cleared."
+        binding.btnNextTrack.setOnClickListener {
+            currentTrackIndex = (currentTrackIndex + 1) % playlist.size
+            loadSongByIndex(currentTrackIndex)
         }
 
+        binding.btnPrevTrack.setOnClickListener {
+            currentTrackIndex = if (currentTrackIndex - 1 < 0) playlist.size - 1 else currentTrackIndex - 1
+            loadSongByIndex(currentTrackIndex)
+        }
+
+        binding.trackItem1.setOnClickListener { loadSongByIndex(0) }
+        binding.trackItem2.setOnClickListener { loadSongByIndex(1) }
+        binding.trackItem3.setOnClickListener { loadSongByIndex(2) }
+
+        // Custom Banner Send Button
         binding.btnUpdateBanner.setOnClickListener {
             val text = binding.etCustomBanner.text.toString().trim()
             if (text.isNotEmpty()) {
                 currentCustomBanner = text.uppercase()
-                binding.tvScreenCustomBanner.text = "💬 $currentCustomBanner"
-                Toast.makeText(this, "Updated Marquee Banner!", Toast.LENGTH_SHORT).show()
+                binding.tvScreenBannerTag.text = "💬 $currentCustomBanner"
+                Toast.makeText(this, "Updated Backpack Marquee!", Toast.LENGTH_SHORT).show()
                 currentTrack?.let { bleService?.bleManager?.sendMetadata(it) }
             }
         }
@@ -141,68 +245,42 @@ class MainActivity : AppCompatActivity() {
         // Live automatic music detection from Spotify / YouTube Music / Apple Music
         MediaNotificationListener.onTrackChanged = { track ->
             runOnUiThread {
-                updateTrackDisplay(track)
+                updateFullUi(track)
                 bleService?.bleManager?.sendMetadata(track)
             }
         }
     }
 
-    private fun setupThemeButtons() {
-        binding.btnThemeCyber.setOnClickListener { applyTheme(Color.parseColor("#06B6D4")) }
-        binding.btnThemePurple.setOnClickListener { applyTheme(Color.parseColor("#8B5CF6")) }
-        binding.btnThemeGreen.setOnClickListener { applyTheme(Color.parseColor("#22C55E")) }
-        binding.btnThemeOrange.setOnClickListener { applyTheme(Color.parseColor("#F97316")) }
-    }
-
-    private fun applyTheme(accentColor: Int) {
-        currentAccentColor = accentColor
-        binding.themeAccentDot.setBackgroundColor(accentColor)
-        binding.btnConnect.backgroundTintList = android.content.res.ColorStateList.valueOf(accentColor)
-        binding.btnUpdateBanner.backgroundTintList = android.content.res.ColorStateList.valueOf(accentColor)
-        binding.pbScreenProgress.progressTintList = android.content.res.ColorStateList.valueOf(accentColor)
-        binding.tvScreenCustomBanner.setTextColor(accentColor)
-
-        val bars = listOf(binding.miniBar1, binding.miniBar2, binding.miniBar3, binding.miniBar4)
-        for (b in bars) {
-            b.setBackgroundColor(accentColor)
-        }
-    }
-
-    private fun setupDemoTracks() {
-        binding.btnDemoSong1.setOnClickListener {
-            loadDemoTrack("Me, Myself and I", "G-Eazy, Bebe Rexha", "When It's Dark Out", Color.parseColor("#06B6D4"), Color.parseColor("#0A2540"))
-        }
-
-        binding.btnDemoSong2.setOnClickListener {
-            loadDemoTrack("Starboy", "The Weeknd, Daft Punk", "Starboy", Color.parseColor("#E50914"), Color.parseColor("#280914"))
-        }
-
-        binding.btnDemoSong3.setOnClickListener {
-            loadDemoTrack("Blinding Lights", "The Weeknd", "After Hours", Color.parseColor("#8B5CF6"), Color.parseColor("#06B6D4"))
-        }
-    }
-
-    private fun loadDemoTrack(title: String, artist: String, album: String, c1: Int, c2: Int) {
-        val art = createGradientArtwork(title, c1, c2)
+    private fun loadSongByIndex(index: Int) {
+        currentTrackIndex = index
+        val item = playlist[index]
+        val art = createGradientArtwork(item.first, item.third, Color.parseColor("#080814"))
         val track = MusicTrack(
-            title = title,
-            artist = artist,
-            album = album,
-            duration = 251,
-            position = 42,
+            title = item.first,
+            artist = item.second,
+            album = item.first,
+            duration = 240,
+            position = 45,
             playing = true,
             artwork = art
         )
-        updateTrackDisplay(track)
+        updateFullUi(track)
         bleService?.bleManager?.sendMetadata(track)
     }
 
-    private fun updateTrackDisplay(track: MusicTrack) {
+    private fun updateFullUi(track: MusicTrack) {
         currentTrack = track
+        isPlaying = track.playing
 
+        // Phone player controls
+        binding.tvPlayerTitle.text = track.title
+        binding.tvPlayerArtist.text = track.artist
+        binding.btnPlayPause.text = if (isPlaying) "⏸" else "▶"
+
+        // Simulated screen display
         binding.tvScreenTrackTitle.text = track.title
         binding.tvScreenTrackArtist.text = track.artist
-        binding.tvScreenCustomBanner.text = currentCustomBanner
+        binding.tvScreenBannerTag.text = currentCustomBanner
 
         track.artwork?.let {
             binding.ivScreenArtwork.setImageBitmap(it)
@@ -218,10 +296,49 @@ class MainActivity : AppCompatActivity() {
         val pct = if (track.duration > 0) ((elapsed.toFloat() / track.duration.toFloat()) * 100).toInt() else 0
         binding.pbScreenProgress.progress = pct
 
-        if (track.playing) {
-            startEqualizer()
-        } else {
-            stopEqualizer()
+        if (isPlaying) startEqualizer() else stopEqualizer()
+    }
+
+    // -------------------------------------------------------------
+    // 5. THEME SWITCHER
+    // -------------------------------------------------------------
+    private fun setupThemeButtons() {
+        binding.btnThemeEmerald.setOnClickListener { applyAccent(Color.parseColor("#10B981")) }
+        binding.btnThemeCyan.setOnClickListener { applyAccent(Color.parseColor("#06B6D4")) }
+        binding.btnThemePurple.setOnClickListener { applyAccent(Color.parseColor("#8B5CF6")) }
+        binding.btnThemeOrange.setOnClickListener { applyAccent(Color.parseColor("#F97316")) }
+    }
+
+    private fun applyAccent(color: Int) {
+        currentAccentColor = color
+        binding.tvLogo.setTextColor(color)
+        binding.btnPlayPause.backgroundTintList = android.content.res.ColorStateList.valueOf(color)
+        binding.btnConnect.backgroundTintList = android.content.res.ColorStateList.valueOf(color)
+        binding.btnUpdateBanner.backgroundTintList = android.content.res.ColorStateList.valueOf(color)
+        binding.pbScreenProgress.progressTintList = android.content.res.ColorStateList.valueOf(color)
+        binding.tvTabHome.setTextColor(color)
+
+        val bars = listOf(binding.miniBar1, binding.miniBar2, binding.miniBar3, binding.miniBar4)
+        for (b in bars) b.setBackgroundColor(color)
+    }
+
+    // -------------------------------------------------------------
+    // 6. BLUETOOTH ENGINE
+    // -------------------------------------------------------------
+    private fun setupBluetoothButtons() {
+        binding.btnConnect.setOnClickListener {
+            connectToServiceSafely()
+            bleService?.bleManager?.startScanAndConnect()
+            updateConnectionUi(false, isScanning = true)
+        }
+
+        binding.btnDisconnect.setOnClickListener {
+            bleService?.bleManager?.disconnect()
+            updateConnectionUi(false)
+        }
+
+        binding.tvClearLogs.setOnClickListener {
+            binding.tvLogs.text = "[BLE Console] Cleared."
         }
     }
 
@@ -231,7 +348,7 @@ class MainActivity : AppCompatActivity() {
             binding.tvBleStatus.setTextColor(Color.parseColor("#10B981"))
             binding.dotStatus.setBackgroundColor(Color.parseColor("#10B981"))
             binding.hardwareLed.setBackgroundColor(Color.parseColor("#10B981"))
-            binding.screenBleIndicator.setBackgroundColor(Color.parseColor("#10B981"))
+            binding.screenBleDot.setBackgroundColor(Color.parseColor("#10B981"))
 
             binding.btnConnect.isEnabled = false
             binding.btnDisconnect.isEnabled = true
@@ -240,7 +357,7 @@ class MainActivity : AppCompatActivity() {
             binding.tvBleStatus.setTextColor(Color.parseColor("#F59E0B"))
             binding.dotStatus.setBackgroundColor(Color.parseColor("#F59E0B"))
             binding.hardwareLed.setBackgroundColor(Color.parseColor("#F59E0B"))
-            binding.screenBleIndicator.setBackgroundColor(Color.parseColor("#F59E0B"))
+            binding.screenBleDot.setBackgroundColor(Color.parseColor("#F59E0B"))
 
             binding.btnConnect.isEnabled = false
             binding.btnDisconnect.isEnabled = true
@@ -249,7 +366,7 @@ class MainActivity : AppCompatActivity() {
             binding.tvBleStatus.setTextColor(Color.parseColor("#EF4444"))
             binding.dotStatus.setBackgroundColor(Color.parseColor("#EF4444"))
             binding.hardwareLed.setBackgroundColor(Color.parseColor("#EF4444"))
-            binding.screenBleIndicator.setBackgroundColor(Color.parseColor("#6B7280"))
+            binding.screenBleDot.setBackgroundColor(Color.parseColor("#EF4444"))
 
             binding.btnConnect.isEnabled = true
             binding.btnDisconnect.isEnabled = false
@@ -282,7 +399,6 @@ class MainActivity : AppCompatActivity() {
         val paint = Paint().apply { shader = gradient }
         canvas.drawRect(0f, 0f, 80f, 80f, paint)
 
-        // Vinyl concentric grooves
         val circlePaint = Paint().apply {
             color = Color.argb(40, 255, 255, 255)
             style = Paint.Style.STROKE
@@ -292,7 +408,6 @@ class MainActivity : AppCompatActivity() {
         canvas.drawCircle(40f, 40f, 26f, circlePaint)
         canvas.drawCircle(40f, 40f, 13f, circlePaint)
 
-        // Title initial
         val textPaint = Paint().apply {
             color = Color.WHITE
             textSize = 14f
