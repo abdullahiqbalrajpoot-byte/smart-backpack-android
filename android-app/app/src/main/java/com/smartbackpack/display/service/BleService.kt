@@ -8,9 +8,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.smartbackpack.display.MainActivity
-import com.smartbackpack.display.R
 import com.smartbackpack.display.ble.BleManager
-import com.smartbackpack.display.model.MusicTrack
 
 class BleService : Service() {
 
@@ -23,11 +21,11 @@ class BleService : Service() {
         const val NOTIFICATION_ID = 1001
 
         fun start(context: Context) {
-            val intent = Intent(context, BleService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
+            try {
+                val intent = Intent(context, BleService::class.java)
                 context.startService(intent)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
@@ -38,25 +36,31 @@ class BleService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        bleManager = BleManager(this)
+        try {
+            bleManager = BleManager(this)
+            createNotificationChannel()
 
-        createNotificationChannel()
-        startForeground(NOTIFICATION_ID, buildNotification("Ready to connect to backpack display"))
+            MediaNotificationListener.onTrackChanged = { track ->
+                updateNotification("Playing: ${track.title} - ${track.artist}")
+                bleManager.sendMetadata(track)
+            }
 
-        // Listen for media changes from MediaNotificationListener
-        MediaNotificationListener.onTrackChanged = { track ->
-            updateNotification("Playing: ${track.title} - ${track.artist}")
-            bleManager.sendMetadata(track)
-        }
-
-        bleManager.onConnectionStateChanged = { connected ->
-            val status = if (connected) "Connected to Backpack Display" else "Searching for Display..."
-            updateNotification(status)
+            bleManager.onConnectionStateChanged = { connected ->
+                val status = if (connected) "Connected to Backpack Display" else "Searching for Display..."
+                updateNotification(status)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        bleManager.startScanAndConnect()
+        try {
+            startForeground(NOTIFICATION_ID, buildNotification("Ready to connect to backpack display"))
+            bleManager.startScanAndConnect()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         return START_STICKY
     }
 
@@ -67,7 +71,7 @@ class BleService : Service() {
                 "Smart Backpack Display Service",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Keeps BLE connected to your backpack display while screen is off"
+                description = "Keeps BLE connected to your backpack display"
             }
             val manager = getSystemService(NotificationManager::class.java)
             manager?.createNotificationChannel(channel)
@@ -92,14 +96,22 @@ class BleService : Service() {
     }
 
     private fun updateNotification(text: String) {
-        val manager = getSystemService(NotificationManager::class.java)
-        manager?.notify(NOTIFICATION_ID, buildNotification(text))
+        try {
+            val manager = getSystemService(NotificationManager::class.java)
+            manager?.notify(NOTIFICATION_ID, buildNotification(text))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder = binder
 
     override fun onDestroy() {
-        bleManager.disconnect()
+        try {
+            bleManager.disconnect()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         super.onDestroy()
     }
 }
