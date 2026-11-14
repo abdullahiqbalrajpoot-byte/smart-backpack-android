@@ -475,6 +475,9 @@ class MainActivity : AppCompatActivity() {
         mainHandler.removeCallbacks(syncRunnable)
         super.onPause()
     }
+
+    override fun onDestroy() {
+        mainHandler.removeCallbacks(syncRunnable)
         if (isBound) {
             try {
                 unbindService(serviceConnection)
