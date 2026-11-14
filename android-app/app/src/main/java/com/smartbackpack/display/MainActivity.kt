@@ -172,7 +172,21 @@ class MainActivity : AppCompatActivity() {
         val artistSafe = escapeJs(track.artist)
         val albumSafe = escapeJs(track.album)
         val duration = track.duration
-        val js = "if (window.onNativeTrackChanged) { window.onNativeTrackChanged('$titleSafe', '$artistSafe', '$albumSafe', $duration); }"
+        val position = track.position
+        val isPlaying = track.playing
+
+        val artworkDataUri = track.artwork?.let { bmp ->
+            try {
+                val stream = java.io.ByteArrayOutputStream()
+                bmp.compress(Bitmap.CompressFormat.JPEG, 80, stream)
+                val base64 = Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP)
+                "data:image/jpeg;base64,$base64"
+            } catch (e: Exception) {
+                ""
+            }
+        } ?: ""
+
+        val js = "if (window.onNativeTrackChanged) { window.onNativeTrackChanged('$titleSafe', '$artistSafe', '$albumSafe', $duration, $position, $isPlaying, '$artworkDataUri'); }"
         binding.webView.post {
             binding.webView.evaluateJavascript(js, null)
         }
@@ -251,6 +265,31 @@ class MainActivity : AppCompatActivity() {
         fun showToast(message: String) {
             runOnUiThread {
                 Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        @JavascriptInterface
+        fun openNotificationAccess() {
+            runOnUiThread {
+                try {
+                    startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+
+        @JavascriptInterface
+        fun openAppDetailsSettings() {
+            runOnUiThread {
+                try {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = android.net.Uri.parse("package:$packageName")
+                    }
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
 
@@ -342,11 +381,28 @@ class MainActivity : AppCompatActivity() {
 
             if (enabledListeners == null || !enabledListeners.contains(pkg)) {
                 AlertDialog.Builder(this)
-                    .setTitle("Grant Media Notification Access")
-                    .setMessage("To automatically send live songs and artwork from Spotify or YouTube Music to your backpack display, please grant notification access.")
-                    .setPositiveButton("Open Settings") { _, _ ->
+                    .setTitle("Spotify & Music Detection Setup")
+                    .setMessage(
+                        "To capture live playing songs, progress, and album art from Spotify / YouTube Music:\n\n" +
+                        "⚠️ If the toggle is DISABLED / GRAYED OUT on your phone:\n\n" +
+                        "1. Tap 'Unlock (3 Dots)' below.\n" +
+                        "2. Tap the 3 dots (⋮) in the top-right corner.\n" +
+                        "3. Select 'Allow restricted settings' and confirm your PIN/fingerprint.\n" +
+                        "4. Then tap 'Enable Access' and turn the toggle ON!"
+                    )
+                    .setPositiveButton("Enable Access") { _, _ ->
                         try {
                             startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                    .setNeutralButton("Unlock (3 Dots)") { _, _ ->
+                        try {
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = android.net.Uri.parse("package:$packageName")
+                            }
+                            startActivity(intent)
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
