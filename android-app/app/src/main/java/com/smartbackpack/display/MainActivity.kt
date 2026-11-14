@@ -1,17 +1,21 @@
 package com.smartbackpack.display
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.*
+import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import android.provider.Settings
+import android.util.Base64
+import android.util.Log
 import android.view.View
+import android.webkit.*
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -20,28 +24,14 @@ import com.smartbackpack.display.databinding.ActivityMainBinding
 import com.smartbackpack.display.model.MusicTrack
 import com.smartbackpack.display.service.BleService
 import com.smartbackpack.display.service.MediaNotificationListener
-import kotlin.random.Random
+import java.io.InputStream
 
 class MainActivity : AppCompatActivity() {
 
+    private val tag = "MainActivity"
     private lateinit var binding: ActivityMainBinding
     private var bleService: BleService? = null
     private var isBound = false
-
-    private val mainHandler = Handler(Looper.getMainLooper())
-    private var isAnimating = false
-    private var isPlaying = true
-    private var currentAccentColor = Color.parseColor("#10B981") // Default Vercel Emerald
-    private var currentCustomBanner = "🎒 MY BACKPACK"
-    private var currentTrack: MusicTrack? = null
-    private var currentTrackIndex = 0
-
-    // Curated catalogue matching Vercel website
-    private val playlist = listOf(
-        Triple("Me, Myself and I", "G-Eazy, Bebe Rexha", Color.parseColor("#10B981")),
-        Triple("Starboy", "The Weeknd, Daft Punk", Color.parseColor("#E50914")),
-        Triple("Blinding Lights", "The Weeknd", Color.parseColor("#8B5CF6"))
-    )
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -51,21 +41,17 @@ class MainActivity : AppCompatActivity() {
                 isBound = true
 
                 bleService?.bleManager?.onConnectionStateChanged = { connected ->
-                    runOnUiThread { updateConnectionUi(connected) }
+                    runOnUiThread { notifyWebBleState(connected) }
                 }
 
                 bleService?.bleManager?.onLogMessage = { log ->
-                    runOnUiThread {
-                        binding.tvLogs.append("\n$log")
-                        binding.scrollLogs.post { 
-                            binding.scrollLogs.fullScroll(View.FOCUS_DOWN) 
-                        }
-                    }
+                    Log.d("BleLog", log)
                 }
 
-                updateConnectionUi(bleService?.bleManager?.isConnected?.get() == true)
+                val connected = bleService?.bleManager?.isConnected?.get() == true
+                notifyWebBleState(connected)
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(tag, "Service connection error: ${e.message}")
             }
         }
 
@@ -78,30 +64,11 @@ class MainActivity : AppCompatActivity() {
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val granted = permissions.values.all { it }
-        if (granted) {
+        val allGranted = permissions.values.all { it }
+        if (allGranted) {
             connectToServiceSafely()
         } else {
-            Toast.makeText(this, "Bluetooth permissions required", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    // Mini animated equalizer bars inside screen
-    private val equalizerRunnable = object : Runnable {
-        override fun run() {
-            if (!isAnimating) return
-            try {
-                val bars = listOf(binding.miniBar1, binding.miniBar2, binding.miniBar3, binding.miniBar4)
-                for (b in bars) {
-                    val h = Random.nextInt(3, 9)
-                    val px = (h * resources.displayMetrics.density).toInt()
-                    b.layoutParams.height = px
-                    b.requestLayout()
-                }
-            } catch (e: Exception) {
-                // Ignore transient layout
-            }
-            mainHandler.postDelayed(this, 140)
+            Toast.makeText(this, "Bluetooth permissions required to connect to display", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -110,285 +77,222 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupBottomNavigation()
-        setupOrientationToggle()
-        setupDisplayModePills()
-        setupPlayerControls()
-        setupThemeButtons()
-        setupBluetoothButtons()
-        startEqualizer()
-        checkNotificationAccess()
+        setupWebView()
+        setupBackNavigation()
         requestAppPermissions()
+        checkNotificationAccess()
 
-        // Load default song
-        loadSongByIndex(0)
-    }
-
-    // -------------------------------------------------------------
-    // 1. EXACT VERCEL BOTTOM NAVIGATION TABS
-    // -------------------------------------------------------------
-    private fun setupBottomNavigation() {
-        binding.tabHome.setOnClickListener { switchTab("dashboard", binding.tvTabHome, binding.sectionDashboard) }
-        binding.tabDisplay.setOnClickListener { switchTab("display", binding.tvTabDisplay, binding.sectionDisplay) }
-        binding.tabBt.setOnClickListener { switchTab("bluetooth", binding.tvTabBt, binding.sectionBluetooth) }
-        binding.tabSettings.setOnClickListener { switchTab("settings", binding.tvTabSettings, binding.sectionSettings) }
-    }
-
-    private fun switchTab(sectionName: String, activeLabel: android.widget.TextView, activeSectionView: View) {
-        val labels = listOf(binding.tvTabHome, binding.tvTabDisplay, binding.tvTabBt, binding.tvTabSettings)
-        val sections = listOf(binding.sectionDashboard, binding.sectionDisplay, binding.sectionBluetooth, binding.sectionSettings)
-
-        // Reset all tabs
-        for (lbl in labels) lbl.setTextColor(Color.parseColor("#6B7280"))
-        for (sec in sections) sec.visibility = View.GONE
-
-        // Activate selected tab
-        activeLabel.setTextColor(currentAccentColor)
-        activeSectionView.visibility = View.VISIBLE
-        binding.tvTopSectionTag.text = sectionName.uppercase()
-    }
-
-    // -------------------------------------------------------------
-    // 2. DISPLAY ORIENTATION SWITCHER
-    // -------------------------------------------------------------
-    private fun setupOrientationToggle() {
-        binding.btnOrientLandscape.setOnClickListener {
-            binding.btnOrientLandscape.setBackgroundColor(Color.parseColor("#24243B"))
-            binding.btnOrientLandscape.setTextColor(Color.WHITE)
-            binding.btnOrientPortrait.setBackgroundColor(Color.TRANSPARENT)
-            binding.btnOrientPortrait.setTextColor(Color.parseColor("#9E9EB8"))
-
-            // Adjust bezel dimensions to Landscape
-            binding.innerScreenBezel.layoutParams.height = (190 * resources.displayMetrics.density).toInt()
-            binding.innerScreenBezel.requestLayout()
-        }
-
-        binding.btnOrientPortrait.setOnClickListener {
-            binding.btnOrientPortrait.setBackgroundColor(Color.parseColor("#24243B"))
-            binding.btnOrientPortrait.setTextColor(Color.WHITE)
-            binding.btnOrientLandscape.setBackgroundColor(Color.TRANSPARENT)
-            binding.btnOrientLandscape.setTextColor(Color.parseColor("#9E9EB8"))
-
-            // Adjust bezel dimensions to Portrait
-            binding.innerScreenBezel.layoutParams.height = (250 * resources.displayMetrics.density).toInt()
-            binding.innerScreenBezel.requestLayout()
-        }
-    }
-
-    // -------------------------------------------------------------
-    // 3. DISPLAY MODE PILLS (Directly under screen)
-    // -------------------------------------------------------------
-    private fun setupDisplayModePills() {
-        val pills = listOf(
-            Pair(binding.btnModeNowPlaying, "NOW PLAYING"),
-            Pair(binding.btnModeVisualizer, "VISUALIZER"),
-            Pair(binding.btnModeMinimal, "MINIMAL"),
-            Pair(binding.btnModeCustomText, "CUSTOM TEXT"),
-            Pair(binding.btnModeStandby, "STANDBY")
-        )
-
-        for ((btn, modeName) in pills) {
-            btn.setOnClickListener {
-                for ((b, _) in pills) {
-                    b.setBackgroundColor(Color.parseColor("#12121E"))
-                    b.setTextColor(Color.parseColor("#9E9EB8"))
-                }
-                btn.setBackgroundColor(Color.parseColor("#152B1E"))
-                btn.setTextColor(currentAccentColor)
-
-                binding.tvScreenBannerTag.text = "MODE: $modeName"
-                Toast.makeText(this, "Display Mode: $modeName", Toast.LENGTH_SHORT).show()
-
-                currentTrack?.let { bleService?.bleManager?.sendMetadata(it) }
-            }
-        }
-    }
-
-    // -------------------------------------------------------------
-    // 4. MUSIC PLAYER & PLAYLIST CONTROLS
-    // -------------------------------------------------------------
-    private fun setupPlayerControls() {
-        binding.btnPlayPause.setOnClickListener {
-            isPlaying = !isPlaying
-            binding.btnPlayPause.text = if (isPlaying) "⏸" else "▶"
-            currentTrack = currentTrack?.copy(playing = isPlaying)
-
-            if (isPlaying) startEqualizer() else stopEqualizer()
-            currentTrack?.let { bleService?.bleManager?.sendMetadata(it) }
-        }
-
-        binding.btnNextTrack.setOnClickListener {
-            currentTrackIndex = (currentTrackIndex + 1) % playlist.size
-            loadSongByIndex(currentTrackIndex)
-        }
-
-        binding.btnPrevTrack.setOnClickListener {
-            currentTrackIndex = if (currentTrackIndex - 1 < 0) playlist.size - 1 else currentTrackIndex - 1
-            loadSongByIndex(currentTrackIndex)
-        }
-
-        binding.trackItem1.setOnClickListener { loadSongByIndex(0) }
-        binding.trackItem2.setOnClickListener { loadSongByIndex(1) }
-        binding.trackItem3.setOnClickListener { loadSongByIndex(2) }
-
-        // Custom Banner Send Button
-        binding.btnUpdateBanner.setOnClickListener {
-            val text = binding.etCustomBanner.text.toString().trim()
-            if (text.isNotEmpty()) {
-                currentCustomBanner = text.uppercase()
-                binding.tvScreenBannerTag.text = "💬 $currentCustomBanner"
-                Toast.makeText(this, "Updated Backpack Marquee!", Toast.LENGTH_SHORT).show()
-                currentTrack?.let { bleService?.bleManager?.sendMetadata(it) }
-            }
-        }
-
-        // Live automatic music detection from Spotify / YouTube Music / Apple Music
+        // Handle live track changes from background media players (Spotify, YouTube Music, etc.)
         MediaNotificationListener.onTrackChanged = { track ->
             runOnUiThread {
-                updateFullUi(track)
+                notifyWebTrackChanged(track)
                 bleService?.bleManager?.sendMetadata(track)
             }
         }
     }
 
-    private fun loadSongByIndex(index: Int) {
-        currentTrackIndex = index
-        val item = playlist[index]
-        val art = createGradientArtwork(item.first, item.third, Color.parseColor("#080814"))
-        val track = MusicTrack(
-            title = item.first,
-            artist = item.second,
-            album = item.first,
-            duration = 240,
-            position = 45,
-            playing = true,
-            artwork = art
-        )
-        updateFullUi(track)
-        bleService?.bleManager?.sendMetadata(track)
-    }
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun setupWebView() {
+        val webView = binding.webView
+        webView.setBackgroundColor(Color.parseColor("#06060F"))
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
 
-    private fun updateFullUi(track: MusicTrack) {
-        currentTrack = track
-        isPlaying = track.playing
+        val settings = webView.settings
+        settings.javaScriptEnabled = true
+        settings.domStorageEnabled = true
+        settings.databaseEnabled = true
+        settings.allowFileAccess = true
+        settings.allowContentAccess = true
+        settings.mediaPlaybackRequiresUserGesture = false
+        settings.loadWithOverviewMode = true
+        settings.useWideViewPort = true
+        settings.cacheMode = WebSettings.LOAD_DEFAULT
 
-        // Phone player controls
-        binding.tvPlayerTitle.text = track.title
-        binding.tvPlayerArtist.text = track.artist
-        binding.btnPlayPause.text = if (isPlaying) "⏸" else "▶"
-
-        // Simulated screen display
-        binding.tvScreenTrackTitle.text = track.title
-        binding.tvScreenTrackArtist.text = track.artist
-        binding.tvScreenBannerTag.text = currentCustomBanner
-
-        track.artwork?.let {
-            binding.ivScreenArtwork.setImageBitmap(it)
-        } ?: run {
-            binding.ivScreenArtwork.setImageResource(android.R.drawable.ic_media_play)
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                consoleMessage?.let {
+                    Log.d("WebConsole", "[${it.messageLevel()}] ${it.message()} (${it.sourceId()}:${it.lineNumber()})")
+                }
+                return true
+            }
         }
 
-        val elapsed = track.position
-        val remaining = (track.duration - track.position).coerceAtLeast(0)
-        binding.tvScreenCurrentTime.text = formatTime(elapsed)
-        binding.tvScreenRemainingTime.text = "-${formatTime(remaining)}"
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                binding.progressBar.visibility = View.VISIBLE
+            }
 
-        val pct = if (track.duration > 0) ((elapsed.toFloat() / track.duration.toFloat()) * 100).toInt() else 0
-        binding.pbScreenProgress.progress = pct
+            override fun onPageFinished(view: WebView?, url: String?) {
+                binding.progressBar.visibility = View.GONE
+                val isConnected = bleService?.bleManager?.isConnected?.get() == true
+                notifyWebBleState(isConnected)
+            }
 
-        if (isPlaying) startEqualizer() else stopEqualizer()
-    }
-
-    // -------------------------------------------------------------
-    // 5. THEME SWITCHER
-    // -------------------------------------------------------------
-    private fun setupThemeButtons() {
-        binding.btnThemeEmerald.setOnClickListener { applyAccent(Color.parseColor("#10B981")) }
-        binding.btnThemeCyan.setOnClickListener { applyAccent(Color.parseColor("#06B6D4")) }
-        binding.btnThemePurple.setOnClickListener { applyAccent(Color.parseColor("#8B5CF6")) }
-        binding.btnThemeOrange.setOnClickListener { applyAccent(Color.parseColor("#F97316")) }
-    }
-
-    private fun applyAccent(color: Int) {
-        currentAccentColor = color
-        binding.tvLogo.setTextColor(color)
-        binding.btnPlayPause.backgroundTintList = android.content.res.ColorStateList.valueOf(color)
-        binding.btnConnect.backgroundTintList = android.content.res.ColorStateList.valueOf(color)
-        binding.btnUpdateBanner.backgroundTintList = android.content.res.ColorStateList.valueOf(color)
-        binding.pbScreenProgress.progressTintList = android.content.res.ColorStateList.valueOf(color)
-        binding.tvTabHome.setTextColor(color)
-
-        val bars = listOf(binding.miniBar1, binding.miniBar2, binding.miniBar3, binding.miniBar4)
-        for (b in bars) b.setBackgroundColor(color)
-    }
-
-    // -------------------------------------------------------------
-    // 6. BLUETOOTH ENGINE
-    // -------------------------------------------------------------
-    private fun setupBluetoothButtons() {
-        binding.btnConnect.setOnClickListener {
-            connectToServiceSafely()
-            bleService?.bleManager?.startScanAndConnect()
-            updateConnectionUi(false, isScanning = true)
+            override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
+                Log.e(tag, "WebView error: ${error?.description}")
+            }
         }
 
-        binding.btnDisconnect.setOnClickListener {
-            bleService?.bleManager?.disconnect()
-            updateConnectionUi(false)
-        }
+        webView.addJavascriptInterface(AndroidBridge(), "AndroidBridge")
+        webView.loadUrl("file:///android_asset/web/index.html")
+    }
 
-        binding.tvClearLogs.setOnClickListener {
-            binding.tvLogs.text = "[BLE Console] Cleared."
+    private fun setupBackNavigation() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (binding.webView.canGoBack()) {
+                    binding.webView.goBack()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
+    }
+
+    private fun notifyWebBleState(connected: Boolean) {
+        val js = "if (window.onNativeBleState) { window.onNativeBleState($connected, 'SMART_BACKPACK_DISPLAY'); }"
+        binding.webView.post {
+            binding.webView.evaluateJavascript(js, null)
         }
     }
 
-    private fun updateConnectionUi(connected: Boolean, isScanning: Boolean = false) {
-        if (connected) {
-            binding.tvBleStatus.text = "CONNECTED"
-            binding.tvBleStatus.setTextColor(Color.parseColor("#10B981"))
-            binding.dotStatus.setBackgroundColor(Color.parseColor("#10B981"))
-            binding.hardwareLed.setBackgroundColor(Color.parseColor("#10B981"))
-            binding.screenBleDot.setBackgroundColor(Color.parseColor("#10B981"))
-
-            binding.btnConnect.isEnabled = false
-            binding.btnDisconnect.isEnabled = true
-        } else if (isScanning) {
-            binding.tvBleStatus.text = "SCANNING..."
-            binding.tvBleStatus.setTextColor(Color.parseColor("#F59E0B"))
-            binding.dotStatus.setBackgroundColor(Color.parseColor("#F59E0B"))
-            binding.hardwareLed.setBackgroundColor(Color.parseColor("#F59E0B"))
-            binding.screenBleDot.setBackgroundColor(Color.parseColor("#F59E0B"))
-
-            binding.btnConnect.isEnabled = false
-            binding.btnDisconnect.isEnabled = true
-        } else {
-            binding.tvBleStatus.text = "DISCONNECTED"
-            binding.tvBleStatus.setTextColor(Color.parseColor("#EF4444"))
-            binding.dotStatus.setBackgroundColor(Color.parseColor("#EF4444"))
-            binding.hardwareLed.setBackgroundColor(Color.parseColor("#EF4444"))
-            binding.screenBleDot.setBackgroundColor(Color.parseColor("#EF4444"))
-
-            binding.btnConnect.isEnabled = true
-            binding.btnDisconnect.isEnabled = false
+    private fun notifyWebTrackChanged(track: MusicTrack) {
+        val titleSafe = escapeJs(track.title)
+        val artistSafe = escapeJs(track.artist)
+        val albumSafe = escapeJs(track.album)
+        val duration = track.duration
+        val js = "if (window.onNativeTrackChanged) { window.onNativeTrackChanged('$titleSafe', '$artistSafe', '$albumSafe', $duration); }"
+        binding.webView.post {
+            binding.webView.evaluateJavascript(js, null)
         }
     }
 
-    private fun startEqualizer() {
-        if (!isAnimating) {
-            isAnimating = true
-            mainHandler.post(equalizerRunnable)
+    private fun escapeJs(str: String?): String {
+        return (str ?: "").replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "")
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // JAVASCRIPT INTERFACE (BRIDGES REACT UI TO NATIVE HARDWARE)
+    // ─────────────────────────────────────────────────────────────
+    inner class AndroidBridge {
+
+        @JavascriptInterface
+        fun isBleConnected(): Boolean {
+            return bleService?.bleManager?.isConnected?.get() ?: false
+        }
+
+        @JavascriptInterface
+        fun startScan() {
+            runOnUiThread {
+                connectToServiceSafely()
+                bleService?.bleManager?.startScanAndConnect()
+                Toast.makeText(this@MainActivity, "Scanning for Smart Backpack...", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        @JavascriptInterface
+        fun disconnect() {
+            runOnUiThread {
+                bleService?.bleManager?.disconnect()
+                Toast.makeText(this@MainActivity, "Disconnected from Backpack", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        @JavascriptInterface
+        fun sendTrack(title: String, artist: String, album: String, duration: Long, artworkUrl: String?) {
+            runOnUiThread {
+                val bitmap = resolveArtworkBitmap(artworkUrl, title)
+                val track = MusicTrack(
+                    title = title,
+                    artist = artist,
+                    album = album,
+                    duration = duration,
+                    position = 0,
+                    playing = true,
+                    artwork = bitmap
+                )
+                bleService?.bleManager?.sendMetadata(track)
+            }
+        }
+
+        @JavascriptInterface
+        fun sendCustomText(text: String) {
+            runOnUiThread {
+                val banner = text.trim()
+                if (banner.isNotEmpty()) {
+                    val art = createGradientArtwork(banner, Color.parseColor("#10B981"), Color.parseColor("#064E3B"))
+                    val track = MusicTrack(
+                        title = banner,
+                        artist = "BACKPACK MARQUEE",
+                        album = "Custom Message",
+                        duration = 0,
+                        position = 0,
+                        playing = false,
+                        artwork = art
+                    )
+                    bleService?.bleManager?.sendMetadata(track)
+                    Toast.makeText(this@MainActivity, "Sent to Backpack Display!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        @JavascriptInterface
+        fun showToast(message: String) {
+            runOnUiThread {
+                Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        @JavascriptInterface
+        fun getBatteryLevel(): Int {
+            return try {
+                val bm = getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+                bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+            } catch (e: Exception) {
+                85
+            }
         }
     }
 
-    private fun stopEqualizer() {
-        isAnimating = false
-        mainHandler.removeCallbacks(equalizerRunnable)
-    }
+    private fun resolveArtworkBitmap(artworkUrl: String?, title: String): Bitmap {
+        if (!artworkUrl.isNullOrEmpty()) {
+            try {
+                // If Base64 image
+                if (artworkUrl.startsWith("data:image")) {
+                    val base64Data = artworkUrl.substringAfter("base64,")
+                    val decoded = Base64.decode(base64Data, Base64.DEFAULT)
+                    val bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.size)
+                    if (bmp != null) return bmp
+                }
 
-    private fun formatTime(seconds: Long): String {
-        val m = seconds / 60
-        val s = seconds % 60
-        return String.format("%d:%02d", m, s)
+                // If local asset path (e.g. "./thumbnails/track1.jpg" or "/thumbnails/track1.jpg")
+                val cleanPath = artworkUrl.removePrefix(".").removePrefix("/")
+                val assetPath = if (cleanPath.startsWith("thumbnails/")) "web/$cleanPath" else "web/thumbnails/$cleanPath"
+                var inputStream: InputStream? = null
+                try {
+                    inputStream = assets.open(assetPath)
+                    val bmp = BitmapFactory.decodeStream(inputStream)
+                    if (bmp != null) return bmp
+                } catch (ignored: Exception) {
+                    // Try fallback without prefix
+                    try {
+                        val fallbackStream = assets.open("web/thumbnails/track1.jpg")
+                        val bmp = BitmapFactory.decodeStream(fallbackStream)
+                        if (bmp != null) return bmp
+                    } catch (e2: Exception) {
+                        Log.e(tag, "Asset load error: ${e2.message}")
+                    }
+                } finally {
+                    inputStream?.close()
+                }
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to resolve artwork: ${e.message}")
+            }
+        }
+
+        // Fallback: Generates high-tech gradient album art with track initials
+        return createGradientArtwork(title, Color.parseColor("#10B981"), Color.parseColor("#064E3B"))
     }
 
     private fun createGradientArtwork(title: String, c1: Int, c2: Int): Bitmap {
@@ -428,8 +332,8 @@ class MainActivity : AppCompatActivity() {
 
             if (enabledListeners == null || !enabledListeners.contains(pkg)) {
                 AlertDialog.Builder(this)
-                    .setTitle("Grant Notification Access")
-                    .setMessage("To detect live song titles and album artwork from Spotify or YouTube Music, please enable Notification Access.")
+                    .setTitle("Grant Media Notification Access")
+                    .setMessage("To automatically send live songs and artwork from Spotify or YouTube Music to your backpack display, please grant notification access.")
                     .setPositiveButton("Open Settings") { _, _ ->
                         try {
                             startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
@@ -476,13 +380,12 @@ class MainActivity : AppCompatActivity() {
                 val intent = Intent(this, BleService::class.java)
                 bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(tag, "Failed to bind BleService: ${e.message}")
             }
         }
     }
 
     override fun onDestroy() {
-        stopEqualizer()
         if (isBound) {
             try {
                 unbindService(serviceConnection)
