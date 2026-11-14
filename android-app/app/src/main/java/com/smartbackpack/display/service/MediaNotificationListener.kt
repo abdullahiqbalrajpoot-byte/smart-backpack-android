@@ -62,7 +62,6 @@ class MediaNotificationListener : NotificationListenerService() {
         if (removedPkg == activeController?.packageName) {
             activeController?.unregisterCallback(controllerCallback)
             activeController = null
-            // Re-scan for any other music playing
             scanActiveNotifications()
         }
     }
@@ -73,23 +72,83 @@ class MediaNotificationListener : NotificationListenerService() {
             Log.d(tag, "Scanning active notifications: found ${notifications.size}")
 
             for (sbn in notifications) {
+                if (isIgnoredPackage(sbn.packageName)) continue
                 if (processNotification(sbn)) {
                     return
                 }
             }
 
-            // Fallback to active sessions manager query
             queryMediaSessions()
         } catch (e: Exception) {
             Log.e(tag, "Error scanning notifications: ${e.message}")
         }
     }
 
+    private fun isIgnoredPackage(pkg: String): Boolean {
+        val p = pkg.lowercase()
+        return p == packageName ||
+               p == "android" ||
+               p == "com.android.systemui" ||
+               p == "com.android.vending" ||
+               p.startsWith("com.google.android.gms") ||
+               p.startsWith("com.google.android.googlequicksearchbox") ||
+               p == "com.android.phone" ||
+               p == "com.google.android.dialer" ||
+               p == "com.whatsapp" ||
+               p == "org.telegram.messenger" ||
+               p == "com.instagram.android" ||
+               p == "com.facebook.katana"
+    }
+
+    private fun isMediaNotification(sbn: StatusBarNotification): Boolean {
+        val notification = sbn.notification ?: return false
+        val extras = notification.extras ?: return false
+        val pkg = sbn.packageName.lowercase()
+
+        // 1. Has MediaSession token
+        if (extras.containsKey(Notification.EXTRA_MEDIA_SESSION)) return true
+
+        // 2. Category is transport
+        if (notification.category == Notification.CATEGORY_TRANSPORT) return true
+
+        // 3. Known media keywords in package name (covers FapTube, YouTube, Spotify, Soundcloud, etc.)
+        if (pkg.contains("tube") || pkg.contains("fap") || pkg.contains("spotify") || 
+            pkg.contains("music") || pkg.contains("audio") || pkg.contains("sound") || 
+            pkg.contains("player") || pkg.contains("vlc") || pkg.contains("podcast") ||
+            pkg.contains("media") || pkg.contains("radio")) {
+            return true
+        }
+
+        // 4. Has media playback actions (Play / Pause / Next / Prev / Skip)
+        val actions = notification.actions ?: emptyArray()
+        for (action in actions) {
+            val title = action.title?.toString()?.lowercase() ?: ""
+            if (title.contains("play") || title.contains("pause") || 
+                title.contains("next") || title.contains("prev") || 
+                title.contains("stop") || title.contains("skip") ||
+                title.contains("forward") || title.contains("rewind")) {
+                return true
+            }
+        }
+
+        // 5. Ongoing notification with large icon / picture and title
+        if (sbn.isOngoing && extras.getCharSequence(Notification.EXTRA_TITLE) != null) {
+            if (notification.getLargeIcon() != null || extras.containsKey("android.picture")) {
+                return true
+            }
+        }
+
+        return false
+    }
+
     private fun processNotification(sbn: StatusBarNotification): Boolean {
         try {
+            if (isIgnoredPackage(sbn.packageName)) return false
             val notification = sbn.notification ?: return false
             val extras = notification.extras ?: return false
             val pkg = sbn.packageName.lowercase()
+
+            if (!isMediaNotification(sbn)) return false
 
             // 1. Check for MediaSession Token directly attached to notification
             val token = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -105,45 +164,55 @@ class MediaNotificationListener : NotificationListenerService() {
                 return true
             }
 
-            // 2. Check if notification is from a known music app (Spotify, YouTube Music, etc.)
-            val isMusic = pkg.contains("spotify") || 
-                          pkg.contains("music") || 
-                          pkg.contains("audio") || 
-                          pkg.contains("youtube") || 
-                          pkg.contains("deezer") || 
-                          pkg.contains("tidal") || 
-                          pkg.contains("soundcloud") ||
-                          notification.category == Notification.CATEGORY_TRANSPORT
+            // 2. Extract directly from notification extras for apps without exposed MediaSession
+            val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()?.trim() ?: ""
+            val artist = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()?.trim() ?: ""
+            val album = extras.getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString()?.trim() ?: ""
 
-            if (isMusic) {
-                val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()?.trim() ?: ""
-                val artist = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()?.trim() ?: ""
-                val album = extras.getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString()?.trim() ?: ""
+            if (title.isNotEmpty()) {
+                // Determine play/pause state from action buttons
+                var isPlaying = sbn.isOngoing
+                val actions = notification.actions ?: emptyArray()
+                for (a in actions) {
+                    val aTitle = a.title?.toString()?.lowercase() ?: ""
+                    if (aTitle.contains("pause")) {
+                        isPlaying = true
+                        break
+                    } else if (aTitle.contains("play") || aTitle.contains("resume")) {
+                        isPlaying = false
+                    }
+                }
 
-                if (title.isNotEmpty()) {
-                    var artworkBmp: Bitmap? = null
+                // Extract artwork: try android.picture (video thumbnail) first, then largeIcon
+                var artworkBmp: Bitmap? = null
+                try {
+                    @Suppress("DEPRECATION")
+                    artworkBmp = extras.getParcelable("android.picture") as? Bitmap
+                } catch (ignored: Exception) {}
+
+                if (artworkBmp == null) {
                     try {
                         val largeIcon = notification.getLargeIcon()
                         artworkBmp = drawableToBitmap(largeIcon?.loadDrawable(this))
                     } catch (e: Exception) {
                         Log.d(tag, "Could not load notification large icon: ${e.message}")
                     }
-
-                    val track = MusicTrack(
-                        title = title,
-                        artist = if (artist.isNotEmpty()) artist else "Unknown Artist",
-                        album = album,
-                        duration = 240,
-                        position = 30,
-                        playing = true,
-                        artwork = artworkBmp
-                    )
-
-                    Log.d(tag, "Extracted track directly from notification: $title by $artist")
-                    currentTrack = track
-                    onTrackChanged?.invoke(track)
-                    return true
                 }
+
+                val track = MusicTrack(
+                    title = title,
+                    artist = if (artist.isNotEmpty()) artist else "Media Player",
+                    album = album,
+                    duration = 240,
+                    position = 30,
+                    playing = isPlaying,
+                    artwork = artworkBmp
+                )
+
+                Log.d(tag, "Extracted track directly from $pkg: $title by $artist (playing: $isPlaying, art: ${artworkBmp != null})")
+                currentTrack = track
+                onTrackChanged?.invoke(track)
+                return true
             }
         } catch (e: Exception) {
             Log.e(tag, "Error processing notification: ${e.message}")
@@ -201,7 +270,8 @@ class MediaNotificationListener : NotificationListenerService() {
         }
 
         val playingController = controllers.firstOrNull {
-            it.playbackState?.state == PlaybackState.STATE_PLAYING
+            val s = it.playbackState?.state
+            s == PlaybackState.STATE_PLAYING || s == PlaybackState.STATE_BUFFERING
         } ?: controllers.first()
 
         if (activeController?.packageName != playingController.packageName) {
@@ -251,6 +321,23 @@ class MediaNotificationListener : NotificationListenerService() {
                     input?.close()
                 } catch (e: Exception) {
                     Log.d(tag, "Could not load art URI: ${e.message}")
+                }
+            }
+        }
+
+        // If controller metadata didn't have art, look in active notifications for this package
+        if (artworkBitmap == null) {
+            val notifications = activeNotifications ?: emptyArray()
+            for (sbn in notifications) {
+                if (sbn.packageName == controller.packageName) {
+                    try {
+                        @Suppress("DEPRECATION")
+                        artworkBitmap = sbn.notification.extras?.getParcelable("android.picture") as? Bitmap
+                    } catch (ignored: Exception) {}
+                    if (artworkBitmap == null) {
+                        artworkBitmap = drawableToBitmap(sbn.notification.getLargeIcon()?.loadDrawable(this))
+                    }
+                    if (artworkBitmap != null) break
                 }
             }
         }
