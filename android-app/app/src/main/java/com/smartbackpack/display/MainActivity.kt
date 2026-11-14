@@ -136,6 +136,10 @@ class MainActivity : AppCompatActivity() {
                 binding.progressBar.visibility = View.GONE
                 val isConnected = bleService?.bleManager?.isConnected?.get() == true
                 notifyWebBleState(isConnected)
+                MediaNotificationListener.currentTrack?.let {
+                    notifyWebTrackChanged(it)
+                }
+                MediaNotificationListener.refresh()
             }
 
             override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
@@ -451,7 +455,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
+    private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val syncRunnable = object : Runnable {
+        override fun run() {
+            MediaNotificationListener.refresh()
+            MediaNotificationListener.currentTrack?.let {
+                notifyWebTrackChanged(it)
+            }
+            mainHandler.postDelayed(this, 1500)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mainHandler.post(syncRunnable)
+    }
+
+    override fun onPause() {
+        mainHandler.removeCallbacks(syncRunnable)
+        super.onPause()
+    }
         if (isBound) {
             try {
                 unbindService(serviceConnection)
