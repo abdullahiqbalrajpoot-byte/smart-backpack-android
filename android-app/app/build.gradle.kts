@@ -52,4 +52,7 @@ dependencies {
 
     // JSON parsing
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // AndroidX WebKit for safe asset loading & ES Modules
+    implementation("androidx.webkit:webkit:1.9.0")
 }
